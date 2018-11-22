@@ -36,7 +36,7 @@ By combining these best of bread products together, customers can enjoy much mor
 
 Our solution will levegerage the following Cisco technologies
 
-*  [WebEx Teams] (https://www.webex.com/products/teams/index.html)
+*[WebEx Teams] (https://www.webex.com/products/teams/index.html)
 *  [WebEx Room Series] (https://www.cisco.com/c/en/us/products/collaboration-endpoints/webex-room-series/index.html)
 *  [Cisco Intelligent Proximity] (https://www.cisco.com/c/en/us/products/collaboration-endpoints/intelligent-proximity.html)
 *  [Identity Services Engine (ISE)] (http://cisco.com/go/ise)
