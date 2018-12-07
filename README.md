@@ -36,19 +36,19 @@ By combining these best of bread products together, customers can enjoy much mor
 
 Our solution will levegerage the following Cisco technologies
 
-* [WebEx Teams] (https://www.webex.com/products/teams/index.html)
-* [WebEx Room Series] (https://www.cisco.com/c/en/us/products/collaboration-endpoints/webex-room-series/index.html)
-* [Cisco Intelligent Proximity] (https://www.cisco.com/c/en/us/products/collaboration-endpoints/intelligent-proximity.html)
-* [Identity Services Engine (ISE)] (http://cisco.com/go/ise)
-* [Cisco PxGrid] (http://www.cisco.com/go/pxgrid)
-* [Umbrella] (http://www.cisco.com/go/umbrella)
+*  [WebEx Teams](https://www.webex.com/products/teams/index.html)
+*  [WebEx Room Series](https://www.cisco.com/c/en/us/products/collaboration-endpoints/webex-room-series/index.html)
+*  [Cisco Intelligent Proximity](https://www.cisco.com/c/en/us/products/collaboration-endpoints/intelligent-proximity.html)
+*  [Identity Services Engine (ISE)](http://cisco.com/go/ise)
+*  [Cisco PxGrid](http://www.cisco.com/go/pxgrid)
+*  [Umbrella](http://www.cisco.com/go/umbrella)
 
 ## Team Members
 
 
 * Chris Bogdon <cbogdon@cisco.com> - Trans PNC Enterprise Account
 * Jason Beltrame <jabeltra@cisco.com> - Greater Pennsylvania Territory
-* Adam Schaeffer<adschaef@cisco.com> - Philadelphia Metro Territory
+* Adam Schaeffer <adschaef@cisco.com> - Philadelphia Metro Territory
 
 
 ## Solution Components
