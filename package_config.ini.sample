@@ -1,3 +1,4 @@
 [platinum-onboard]
 url: https://api.ciscospark.com
 token: {Insert Spark Token}
+security-ip: {Insert Security IP Module}
