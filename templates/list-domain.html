@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="home">
+      <h2>Device Table</h2>
+
+  </div>
+    <div>
+
+      <table border = 1>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Date</th>
+        </tr>
+
+         {% for row in rows %}
+            <tr>
+               <td>{{row["id"]}}</td>
+               <td>{{row["name"]}}</td>
+               <td> {{ row["date"]}}</td>
+            </tr
+         {% endfor %}
+      </table>
+    </div>
+{% endblock %}
