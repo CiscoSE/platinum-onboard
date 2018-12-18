@@ -1,4 +1,10 @@
 def validate_byte_as_printable(byte):
+    """
+    @param byte: a Byte
+    @return: either the byte or a . if the byte is note printable
+
+    This function returns either the character passed to it or a period (.) if it is not able to be printed
+    """
     ## Check if byte is a printable ascii character. If not replace with a '.' character ##
     if ord(byte) < 128 and ord(byte) >= 32:
         return byte
@@ -38,6 +44,9 @@ def print_details(r):
     print ("Headers:")
     print ("--------")
     print (r.headers)
+    print ("Parameters")
+    print ("----------")
+    print (str(r.args.to_dict()))
     print ("Body:")
     print ("-----")
     print ("Length: "+str(len(r.data)))

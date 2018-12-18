@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="home">
+      <h2>Clear Devices</h2>
+
+  </div>
+    <div>
+
+      <table border = 1>
+        <tr>
+            <th>Table Name</th>
+            <th>Status</th>
+        </tr>
+                      <tr>
+               <td>Guest</td>
+               <td>{{guest}}</td>
+            </tr>
+
+                                <tr>
+               <td>Domain</td>
+               <td>{{domain}}</td>
+            </tr>
+
+
+                                <tr>
+               <td>Device</td>
+               <td>{{device}}</td>
+            </tr>
+      </table>
+
+    </div>
+{% endblock %}

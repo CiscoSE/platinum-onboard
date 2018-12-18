@@ -8,6 +8,24 @@ def get_a_uuid():
     print(r_uuid)
     return str(r_uuid.decode('utf-8')).replace('=','')
 
+
+def create_command_line (args):
+
+    numparamsleft=len(args)
+    fieldnames=""
+    values=""
+
+    for key,value in args.items():
+        fieldnames=fieldnames+key
+        values=values+"'"+value+"'"
+        numparamsleft=numparamsleft-1
+        if numparamsleft>=1:
+            fieldnames=fieldnames+","
+            values=values+','
+
+    return fieldnames,values
+
+
 def initialize_database(dbname):
     print ("Initializing the database: "+dbname)
 
@@ -58,17 +76,8 @@ def insert_into_database(dbname,table,**kwargs):
     d=datetime.datetime.now()
 
     print(kwargs)
-    numparamsleft=len(kwargs)
-    fieldnames=""
-    values=""
 
-    for key,value in kwargs.items():
-        fieldnames=fieldnames+key
-        values=values+"'"+value+"'"
-        numparamsleft=numparamsleft-1
-        if numparamsleft>=1:
-            fieldnames=fieldnames+","
-            values=values+','
+    fieldnames,values = create_command_line(kwargs)
 
     print (fieldnames)
     print (values)
@@ -98,6 +107,43 @@ def search_db(dbname,table):
     data=curs.fetchall()
 
     return data
+
+def update_database(dbname,table,field,condition):
+
+    conn = sqlite3.connect(dbname)
+
+    update_command = "UPDATE "+table+" SET "+field+" WHERE "+condition
+
+    try:
+        conn.execute(update_command)
+        conn.commit()
+    except (sqlite3.Error) as e:
+        print(e)
+        return(False,str(e))
+    conn.close()
+    return(True,id)
+
+
+def delete_database(dbname,table,condition):
+
+    delete_command = "DELETE FROM "+table
+    if condition != "":
+        delete_command += " WHERE "+condition
+
+    delete_command +=";"
+
+    print(delete_command)
+
+    conn = sqlite3.connect(dbname)
+
+    try:
+        conn.execute(delete_command)
+        conn.commit()
+    except (sqlite3.Error) as e:
+        print(e)
+        return(False,str(e))
+    conn.close()
+    return(True,id)
 
 def search_database(dbname,table,field,value):
     conn = sqlite3.connect(dbname)
