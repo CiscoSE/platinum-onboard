@@ -1,4 +1,7 @@
 [platinum-onboard]
 url: https://api.ciscospark.com
 token: {Insert Spark Token}
-security-ip: {Insert Security IP Module}
+listen-ip: {Insert IP to Listen on}
+listen-port: {Insert Port to Listen on}
+provision-ip: {Insert Provision IP Module}
+webdebug: False
