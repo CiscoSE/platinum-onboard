@@ -4,8 +4,6 @@ from utilities import print_details
 from flask import Flask,jsonify,request,render_template
 import db
 
-
-
 print ("Platinum Onboard Engine Starting...\n")
 
 print("Configuration Options:")
@@ -23,7 +21,7 @@ except configparser.Error:
 
 try:
     teamsurl = config.get("platinum-onboard","url")
-except ConfigParser.NoOptionError:
+except configparser.NoOptionError:
     # Defaulting to the standard Spark API
     teamsurl = "https://api.ciscospark.com"
 
@@ -31,13 +29,14 @@ print ("teamsurl: "+teamsurl)
 
 # This flag turns on debugging of the web messages hitting the flask server
 try:
-    WEBDEBUG = config.get("platinum-onboard","webdebug")
-
-except ConfigParser.NoOptionError:
-    # Defaulting to the standard Spark API
+    debugmode = config.get("platinum-onboard","webdebug")
+    if debugmode == 'True':
+        WEBDEBUG = True
+    else:
+        WEBDEBUG = False
+except configparser.NoOptionError:
     WEBDEBUG=False
 
-print ("webdebug: "+str(WEBDEBUG))
 
 try:
     teamstoken = config.get("platinum-onboard","token")
@@ -109,7 +108,7 @@ def listguest():
 @app.route('/clear-tables')
 def cleartables():
 
-    ret,guestmsg = db.delete_database(dbname,"guest","")
+    ret,guestmsg = db.delete_database(dbname, "guest", "")
     if ret:
         guestmsg="Deleted"
     ret,domainmsg = db.delete_database(dbname, "domain", "")
@@ -129,17 +128,19 @@ def getuserbyid():
 
     if 'teamsid' not in request.args:
         return (jsonify({"result": "no parameter"}))
-    return(jsonify(email=teamsapi.getemailfromid(teamsurl,teamstoken,request.args['teamsid'])))
+    return(jsonify(email=teamsapi.getemailfromid(teamsurl, teamstoken, request.args['teamsid'])))
 
 # Returns a json representing the detailed information given a teamsid
 @app.route('/api/get-detailed-info-by-id', methods=['GET'])
 def getdetailedinfo():
+
     if WEBDEBUG:
+        print ("Debugging")
         print_details(request)
 
     if 'teamsid' not in request.args:
         return (jsonify({"result": "no parameter"}))
-    return(jsonify(teamsapi.getdetailedinfofromid(teamsurl,teamstoken,request.args['teamsid'])))
+    return(jsonify(teamsapi.getdetailedinfofromid(teamsurl, teamstoken, request.args['teamsid'])))
 
 # Returns a json representing if the email domain is in the white list database
 @app.route('/api/get-email-domain', methods=['GET'])
@@ -150,7 +151,7 @@ def getemaildomain():
     if 'domain' not in request.args:
         return (jsonify({"result": "no parameter"}))
 
-    ret,msg = db.search_database(dbname,"domain","name",request.args['domain'])
+    ret,msg = db.search_database(dbname, "domain", "name", request.args['domain'])
     return (jsonify({"result": msg}))
 
 # Adds a domain to the white list database
@@ -160,7 +161,7 @@ def postemaildomain():
         print_details(request)
     if 'domain' not in request.args:
         return (jsonify({"result": "no parameter"}))
-    ret,msg=db.insert_into_database(dbname,"domain",NAME=request.args['domain'])
+    ret,msg= db.insert_into_database(dbname, "domain", NAME=request.args['domain'])
 
     return(jsonify({"result":msg}))
 
@@ -172,7 +173,7 @@ def getendpointid():
         print_details(request)
     if 'deviceid' not in request.args:
         return (jsonify({"result": "no parameter"}))
-    ret,msg = db.search_database(dbname,"device","name",request.args['deviceid'])
+    ret,msg = db.search_database(dbname, "device", "name", request.args['deviceid'])
 
     return(jsonify({"result":msg}))
 
@@ -184,7 +185,7 @@ def postendpointid():
 
     if 'deviceid' not in request.args:
         return (jsonify({"result": "no parameter"}))
-    ret, msg = db.insert_into_database(dbname, "device",NAME=request.args['deviceid'])
+    ret, msg = db.insert_into_database(dbname, "device", NAME=request.args['deviceid'])
 
     return (jsonify({"result": msg}))
 
@@ -204,7 +205,7 @@ def generateguestaccount():
         if (not ret):
             return(jsonify({"result": "not authorized"}))
 
-        ret=teamsapi.getemailfromid(teamsurl, teamstoken, request.args['teamsid'])
+        ret= teamsapi.getemailfromid(teamsurl, teamstoken, request.args['teamsid'])
 
         if ret=="":
             return (jsonify({"result": "teamsid not found"}))
@@ -222,7 +223,7 @@ def generateguestaccount():
 
         # Trigger the initiation of the guest account create since the data is effective
         print ("Triggering Guest Creation of '"+emailaddress+"' from device '"+deviceid+"' to "+provisionip)
-        ret, msg = db.insert_into_database(dbname,"guest",NAME=emailaddress,DEVICE=deviceid,STATUS="initiated")
+        ret, msg = db.insert_into_database(dbname, "guest", NAME=emailaddress, DEVICE=deviceid, STATUS="initiated")
 
         if (not ret):
             return (jsonify({"result": msg}))
@@ -251,7 +252,7 @@ def updatestatusguestaccount():
 
     if ('emailid' in request.args) and ('status' in request.args):
 
-        ret, msg = db.update_database(dbname,"guest","STATUS='"+request.args['status']+"'", "NAME='"+request.args['emailid']+"'")
+        ret, msg = db.update_database(dbname, "guest", "STATUS='" + request.args['status'] + "'", "NAME='" + request.args['emailid'] + "'")
         return (jsonify({"result":ret}))
     else:
         return (jsonify({"result":"wrong paramters"}))
