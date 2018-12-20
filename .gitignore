@@ -104,3 +104,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 /broker/package_config.ini
+!/broker/package_config.ini
