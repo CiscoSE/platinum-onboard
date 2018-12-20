@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="home">
+      <h2>Add to Domain Table</h2>
+
+  </div>
+    <div>
+
+      <form action = "{{ url_for('adddomain') }}" method = "POST">
+         Enter a new email domain to be entered into the database.<br>
+          <br>
+         Name:  <input type = "text" name = "domainid" /></br>
+          <br>
+                   <input type = "Submit" value = "Submit" /><br>
+      </form>
+
+
+    </div>
+{% endblock %}
+
+</html>
