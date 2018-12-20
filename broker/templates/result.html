@@ -1,0 +1,17 @@
+
+{% extends "layout.html" %}
+{% block content %}
+  <div class="home">
+      <h2>Result</h2>
+
+  </div>
+    <div>
+          <br>
+        The result of the addition to the database is: {{ msg }}
+        <br>
+        <br>
+    <li><a href="{{ url_for('home') }}">Return to main screen</a></li>
+    </div>
+{% endblock %}
+
+</html>

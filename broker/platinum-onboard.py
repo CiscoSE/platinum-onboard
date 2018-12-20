@@ -119,6 +119,35 @@ def cleartables():
         devicemsg="Deleted"
     return render_template("clear-tables.html", guest=guestmsg,domain=domainmsg,device=devicemsg)
 
+@app.route('/add-device')
+def dispdeviceadd():
+    return render_template('device.html')
+
+
+@app.route('/adddevice', methods=['POST', 'GET'])
+def adddevice():
+    if request.method == 'POST':
+
+        deviceid = request.form['deviceid']
+
+        ret, msg = db.insert_into_database(dbname, "device", NAME=deviceid)
+
+    return render_template("result.html",msg = msg)
+
+@app.route('/add-domain')
+def dispdomainadd():
+    return render_template('domain.html')
+
+
+@app.route('/adddomain', methods=['POST', 'GET'])
+def adddomain():
+    if request.method == 'POST':
+
+        domainid = request.form['domainid']
+
+        ret, msg = db.insert_into_database(dbname, "domain", NAME=domainid)
+
+    return render_template("result.html",msg = msg)
 
 # Returns a json representing the email address given a teamsid
 @app.route('/api/get-user-by-id', methods=['GET'])
@@ -256,7 +285,7 @@ def updatestatusguestaccount():
             if ('guestpassword' not in request.args):
                 return(jsonify({"result":"no guest password"}))
             else:
-            # TODO: Insert the guestpassword
+
                 print ("Guest Password:"+request.args['guestpassword'])
 
                 updatestring="STATUS='" + request.args['status'] + "', GUESTPASSWORD='"+request.args['guestpassword']+"'"

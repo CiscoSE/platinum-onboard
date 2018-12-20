@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="home">
+      <h2>Add to Device Table</h2>
+
+  </div>
+    <div>
+
+      <form action = "{{ url_for('adddevice') }}" method = "POST">
+         Enter a new device id to be entered into the database.<br>
+          <br>
+         Name:  <input type = "text" name = "deviceid" /></br>
+          <br>
+                   <input type = "Submit" value = "Submit" /><br>
+      </form>
+
+
+    </div>
+{% endblock %}
+
+</html>
