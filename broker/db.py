@@ -52,6 +52,7 @@ def initialize_database(dbname):
                                         id text PRIMARY KEY,
                                         name text NOT NULL,
                                         device text NOT NULL,
+                                        guestpassword text NULL,
                                         date text NOT NULL,
                                         status text NOT NULL
                                     );"""
@@ -114,6 +115,7 @@ def update_database(dbname,table,field,condition):
 
     update_command = "UPDATE "+table+" SET "+field+" WHERE "+condition
 
+    print (update_command)
     try:
         conn.execute(update_command)
         conn.commit()

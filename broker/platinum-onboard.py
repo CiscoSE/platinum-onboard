@@ -252,7 +252,20 @@ def updatestatusguestaccount():
 
     if ('emailid' in request.args) and ('status' in request.args):
 
-        ret, msg = db.update_database(dbname, "guest", "STATUS='" + request.args['status'] + "'", "NAME='" + request.args['emailid'] + "'")
+        if request.args['status']=="completed":
+            if ('guestpassword' not in request.args):
+                return(jsonify({"result":"no guest password"}))
+            else:
+            # TODO: Insert the guestpassword
+                print ("Guest Password:"+request.args['guestpassword'])
+
+                updatestring="STATUS='" + request.args['status'] + "', GUESTPASSWORD='"+request.args['guestpassword']+"'"
+
+        else:
+            updatestring = "STATUS='" + request.args['status'] + "'"
+
+        ret, msg = db.update_database(dbname, "guest", updatestring, "NAME='" + request.args['emailid'] + "'")
+
         return (jsonify({"result":ret}))
     else:
         return (jsonify({"result":"wrong paramters"}))
