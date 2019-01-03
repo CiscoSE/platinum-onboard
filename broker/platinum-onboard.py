@@ -1,5 +1,6 @@
 import configparser
 import teamsapi
+from datetime import date
 from utilities import print_details
 from flask import Flask,jsonify,request,render_template
 import db
@@ -118,6 +119,14 @@ def cleartables():
     if ret:
         devicemsg="Deleted"
     return render_template("clear-tables.html", guest=guestmsg,domain=domainmsg,device=devicemsg)
+
+@app.route('/clear-guesttable')
+def clearguesttable():
+
+    ret,guestmsg = db.delete_database(dbname, "guest", "")
+    if ret:
+        guestmsg="Deleted"
+    return render_template("clear-tables.html", guest=guestmsg,domain="Not Deleted",device="Not Deleted")
 
 @app.route('/add-device')
 def dispdeviceadd():
@@ -251,8 +260,27 @@ def generateguestaccount():
             return (jsonify({"result": "not authorized"}))
 
         # Trigger the initiation of the guest account create since the data is effective
+
+        print("Create WebEx Teams Room with the new Password!")
+        ret=teamsapi.createteamsroom(teamsurl, teamstoken,"Platinum Onboard Guest Wireless "+str(date.today())+" - "+emailaddress)
+        if ret == '':
+            print("Unable to create the teams room")
+        else:
+            roomId = ret
+
+        print ("roomID="+roomId)
+        ret=teamsapi.adduserstoroom(teamsurl, teamstoken,roomId,emailaddress)
+        if ret == '':
+            print("Unable to add people to the teams room")
+
+        ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Welcome to the Platinum Onboard Service")
+        ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "We have initiated the creation of the guest wireless account for "+emailaddress)
+        ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Please give us a few moments until your account is provisioned")
+
+
         print ("Triggering Guest Creation of '"+emailaddress+"' from device '"+deviceid+"' to "+provisionip)
-        ret, msg = db.insert_into_database(dbname, "guest", NAME=emailaddress, DEVICE=deviceid, STATUS="initiated")
+        ret, msg = db.insert_into_database(dbname, "guest", NAME=emailaddress, DEVICE=deviceid, STATUS="initiated", TEAMSROOMID=roomId)
+
 
         if (not ret):
             return (jsonify({"result": msg}))
@@ -281,6 +309,8 @@ def updatestatusguestaccount():
 
     if ('emailid' in request.args) and ('status' in request.args):
 
+        emailid = request.args['emailid']
+
         if request.args['status']=="completed":
             if ('guestpassword' not in request.args):
                 return(jsonify({"result":"no guest password"}))
@@ -289,6 +319,16 @@ def updatestatusguestaccount():
                 print ("Guest Password:"+request.args['guestpassword'])
 
                 updatestring="STATUS='" + request.args['status'] + "', GUESTPASSWORD='"+request.args['guestpassword']+"'"
+
+                print ("Emailid="+emailid)
+                ret, msg = db.search_database(dbname, "guest", "name", emailid)
+                print (msg['teamsroomid'])
+
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "Congratulations, Your account was successfully created!")
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "Your guest wireless password is: "+request.args['guestpassword'])
+
 
         else:
             updatestring = "STATUS='" + request.args['status'] + "'"
