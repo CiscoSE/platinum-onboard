@@ -4,10 +4,6 @@
 //Notices can screw up the http reply sent to the codec when it sends httpfeedback
 error_reporting(E_ALL & ~E_NOTICE);
 
-//endpoint credentials
-$user = 'user';
-$pass = 'cisco';
-
 include('./config.php');
 include ('./functions.php');
 
