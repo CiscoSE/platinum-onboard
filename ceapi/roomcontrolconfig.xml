@@ -1,0 +1,11 @@
+<Extensions>
+  <Version>1.5</Version>
+  <Panel>
+    <PanelId>register</PanelId>
+    <Type>Statusbar</Type>
+    <Icon>Laptop</Icon>
+    <Order>1</Order>
+    <Color>#A866FF</Color>
+    <Name>Network Registration</Name>
+  </Panel>
+</Extensions>
