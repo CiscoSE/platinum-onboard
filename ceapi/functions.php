@@ -9,7 +9,8 @@
 //logs to a file
 function logit($string){
 	if(is_array($string)){ $string = print_r($string,true);}
-	file_put_contents("./log",$string ."\n",FILE_APPEND);
+	$timestamp = date("d/M/Y:H:i:s P");
+	file_put_contents("./log","[$timestamp] $string\n",FILE_APPEND);
 	//echo "test";
 }
 
@@ -25,8 +26,6 @@ function pa($var, $mode = "text"){
 *Functions for calling the video endpoint API
 *
 ********************************************/
-
-
 
 //authentication with the end point and return SecureSessionId
 function authenticate_web($ip,$username,$password){
@@ -147,6 +146,42 @@ function send_no_webex_pair($ip,$sessionId){
 						<Option.1>Ok</Option.1>
 						<Text>Please Pair with the device via Webex Teams Proximity</Text>
 						<Title>No User Paired</Title>
+					</Display>
+				</Prompt>
+			</Message>
+		</UserInterface>
+	</Command>';
+	
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array("Cookie: SecureSessionId=$sessionId"));
+	curl_setopt($ch, CURLOPT_URL, $url); 
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+	curl_setopt($ch, CURLOPT_HEADER, array('Content-Type:application/xml'));  
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $string);	
+
+	$output = curl_exec($ch);
+	
+	return $output;
+}
+
+
+//sends a message that the user is already initiated
+function send_user_initiated($ip,$sessionId){
+
+	$url = "https://$ip/putxml";  
+	$ch = curl_init();  
+	$string = 
+	'<Command>
+		<UserInterface>
+			<Message>
+				<Prompt>
+					<Display>
+						<Duration>15</Duration>
+						<FeedbackId>user_initiated</FeedbackId>
+						<Option.1>Ok</Option.1>
+						<Text>Your user account request has already been initiated.  You will recieve a message in Webex Teams when it has been provisioned.</Text>
+						<Title>User Already Initiated</Title>
 					</Display>
 				</Prompt>
 			</Message>
