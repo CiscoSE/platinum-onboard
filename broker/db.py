@@ -53,6 +53,7 @@ def initialize_database(dbname):
                                         name text NOT NULL,
                                         device text NOT NULL,
                                         guestpassword text NULL,
+                                        teamsroomid text NULL,
                                         date text NOT NULL,
                                         status text NOT NULL
                                     );"""
@@ -159,13 +160,13 @@ def search_database(dbname,table,field,value):
 
     final={}
     num_rows_fetched = len(data)
-
+    print(data)
     if num_rows_fetched<1:
         return(False,final)
     else:
         count=0
         for i in names:
-            print(i+" "+data[0][count])
+            print(i+" "+str(data[0][count]))
             final[i]=data[0][count]
 
             count = count + 1
