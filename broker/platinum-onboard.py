@@ -259,6 +259,19 @@ def generateguestaccount():
         if (not ret):
             return (jsonify({"result": "not authorized"}))
 
+
+        ret, msg = db.search_database(dbname, "guest", "name", emailaddress)
+
+        if (ret):
+            print(str(msg))
+            print ("User "+emailaddress+" already has a account initiated!")
+
+            if (msg['status']== 'initiated'):
+
+                return (jsonify({"result": "initiated"}))
+            else:
+                return (jsonify({"result": "completed","password" : msg['guestpassword']}))
+
         # Trigger the initiation of the guest account create since the data is effective
 
         print("Create WebEx Teams Room with the new Password!")
