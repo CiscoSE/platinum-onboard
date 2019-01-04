@@ -66,3 +66,107 @@ def getdetailedinfofromid(url,token,personid):
         return (message_dict['items'][0])
     else:
         return ''
+
+
+def createteamsroom(url,token,name):
+
+
+    apistring = url+"/v1/rooms"
+
+    # Set up the Headers based upon the Tropo API
+    headers = {'Authorization': 'Bearer {}'.format(token),
+            'content-type': 'application/json'}
+
+    bodydetails = '{"title": "'+name+'"}'
+
+    print (apistring)
+    print(headers)
+    print (bodydetails)
+    try:
+        resp = requests.request("POST",apistring, headers=headers,data=bodydetails)
+
+        message_dict = json.loads(resp.text)
+        print(message_dict)
+        print (resp)
+    except requests.exceptions.RequestException as e:
+        print (e)
+        return ''
+
+
+    if resp.status_code == 200:
+
+        message_dict = json.loads(resp.text)
+        print (message_dict)
+
+        return (message_dict['id'])
+    else:
+        return ''
+
+
+def adduserstoroom(url,token,roomid,name):
+
+
+    apistring = url+"/v1/memberships"
+
+    # Set up the Headers based upon the Tropo API
+    headers = {'Authorization': 'Bearer {}'.format(token),
+            'content-type': 'application/json'}
+
+    bodydetails = '{"roomId": "'+roomid+'","personEmail":"'+name+'"}'
+
+    print (apistring)
+    print(headers)
+    print (bodydetails)
+    try:
+        resp = requests.request("POST",apistring, headers=headers,data=bodydetails)
+
+        message_dict = json.loads(resp.text)
+        print(message_dict)
+        print (resp)
+    except requests.exceptions.RequestException as e:
+        print (e)
+        return ''
+
+
+    if resp.status_code == 200:
+
+        message_dict = json.loads(resp.text)
+        print (message_dict)
+
+        return (message_dict['id'][0])
+    else:
+        return ''
+
+def sendmessagetoroom(url,token,roomid,message):
+
+
+    apistring = url+"/v1/messages"
+
+    # Set up the Headers based upon the Tropo API
+    headers = {'Authorization': 'Bearer {}'.format(token),
+            'content-type': 'application/json'}
+
+    bodydetails = '{"roomId": "'+roomid+'","text":"'+message+'"}'
+
+    print (apistring)
+    print(headers)
+    print (bodydetails)
+    try:
+        resp = requests.request("POST",apistring, headers=headers,data=bodydetails)
+
+        message_dict = json.loads(resp.text)
+        print(message_dict)
+        print (resp)
+    except requests.exceptions.RequestException as e:
+        print (e)
+        return ''
+
+
+    if resp.status_code == 200:
+
+        message_dict = json.loads(resp.text)
+        print (message_dict)
+
+        return (message_dict['id'][0])
+    else:
+        return ''
