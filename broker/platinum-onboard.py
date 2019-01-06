@@ -1,5 +1,6 @@
 import configparser
 import teamsapi
+import requests
 from datetime import date
 from utilities import print_details
 from flask import Flask,jsonify,request,render_template
@@ -241,7 +242,7 @@ def generateguestaccount():
         ret, msg = db.search_database(dbname, "device", "name", deviceid)
 
         if (not ret):
-            return(jsonify({"result": "not authorized"}))
+            return(jsonify({"result": "deviceid not authorized"}))
 
         ret= teamsapi.getemailfromid(teamsurl, teamstoken, request.args['teamsid'])
 
@@ -257,7 +258,7 @@ def generateguestaccount():
         ret, msg = db.search_database(dbname, "domain", "name", emaildomain)
 
         if (not ret):
-            return (jsonify({"result": "not authorized"}))
+            return (jsonify({"result": "email domain not authorized"}))
 
 
         ret, msg = db.search_database(dbname, "guest", "name", emailaddress)
@@ -292,13 +293,37 @@ def generateguestaccount():
 
 
         print ("Triggering Guest Creation of '"+emailaddress+"' from device '"+deviceid+"' to "+provisionip)
+
+
+        apistring = "http://64.121.80.249:8444/api/check-guest.php?emailid="+emailaddress
+        print ("Sending API to trigger guest creation: "+apistring)
+        # Set up the Headers based upon the Tropo API
+
+        # Post the API call to the tropo API using the payload and headers defined above
+        try:
+            resp = requests.get(apistring)
+        except requests.exceptions.RequestException as e:
+            print(e)
+            return (jsonify({"result": e}))
+
+        if resp.status_code == 200:
+            print (resp.text)
+
+        else:
+            return (jsonify({"result": "unable to send message to provisioning server"}))
+
+
+
         ret, msg = db.insert_into_database(dbname, "guest", NAME=emailaddress, DEVICE=deviceid, STATUS="initiated", TEAMSROOMID=roomId)
 
 
         if (not ret):
-            return (jsonify({"result": msg}))
-        else:
+            # There was an issue with inserting the record.   This is a problem since we should role back the creation.
             return (jsonify({"result":msg}))
+        else:
+            # This was successful
+            return (jsonify({"result": "success","record_id":msg}))
+
     else:
         return (jsonify({"result": "wrong paramters"}))
 
