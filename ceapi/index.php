@@ -18,12 +18,13 @@ $event = json_decode($data,TRUE);
 if(isset($event['Event']['Identification']['IPAddress']['Value'])){
 	$ip = $event['Event']['Identification']['IPAddress']['Value'];
 }else{
+	logit("Invalid data was recieved by the API");
 	exit();//only hit when malformed requests are sent
 }
 
 
 //Authenticate to the calling endpoint
-if(!$secureSessionId = authenticate_web($ip,$user,$pass)){
+if(!$secureSessionId = authenticate_web($ip,$username,$password)){
 	logit("Failed to Authenticate to the video endpoint: $ip");
 	exit();
 }
@@ -35,6 +36,7 @@ if($event['Event']['UserInterface']['Extensions']['Panel']['Clicked']['PanelId']
 	if($users = get_paired_users($ip,$secureSessionId)){
 		send_confirm_options_popup($ip,$secureSessionId,$users);
 	}else{
+		logit("A user attempted to create an account without being paired in Webex Teams");
 		send_no_webex_pair($ip,$secureSessionId);
 	}
 }
@@ -44,11 +46,27 @@ if($event['Event']['UserInterface']['Message']['Prompt']['Response']['OptionId']
 	//logit("response recieved");
 	$userId = $event['Event']['UserInterface']['Message']['Prompt']['Response']['FeedbackId']['Value'];
 	$deviceId = $event['Event']['Identification']['SerialNumber']['Value'];
+	
 	if($result = create_user($userId,$deviceId)){
-		$val = json_decode($result,true);
-		logit("A user with the teams id of: $userId was requested with result code of: " . $val['result']);
+		//logit($result); //to dump the reply content to log file
+		$result = json_decode($result,true);
+		$msg = $result['result'];
+		
+		switch ($msg) {
+			case 'initiated':
+				send_user_initiated($ip,$secureSessionId);
+				logit("A user account request with the teams id of: $userId has been initiated");
+				break;
+			case 'completed':
+				logit("A user with the teams id of: $userId is already provisioned");
+				break;
+			default:
+				logit("A user with the teams id of: $userId was requested with result code of: " . $msg);
+			break;
+		}
+		
 	}else{
-		logit("Failed to create user with teams id of: $userId");
+		logit("Failed to create user with teams id of: $userId \n\tVerify the Broker microservice is available");
 	}
 }
 
