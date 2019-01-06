@@ -6,8 +6,14 @@ user creation functions.
 
 Before use edit to your needs and rename "sample-config.php" to "config.php"
 
-On your video endpoint you will need to enable HTTP Feedback.  Use the CLI command below substituting 
-the IP / Hostname of your CEAPI service.
+### Video Endpoint Setup
+
+First, you will need to import the xml file to your video endpoint's in room controls.  This 
+provides the GUI button to allow registrants to start the process.  
+
+
+Next, on your video endpoint you will need to enable HTTP Feedback.  Use the CLI command below 
+substituting the IP / Hostname of your CEAPI service.
 
 xcommand HttpFeedback Register FeedbackSlot: 1 
 Expression: /Event/UserInterface/Extensions/Panel/Clicked 
