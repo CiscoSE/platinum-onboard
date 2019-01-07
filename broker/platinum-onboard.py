@@ -372,7 +372,7 @@ def updatestatusguestaccount():
 
 
         else:
-            print ("else on update string")
+            print ("else on update string  ")
             updatestring = "STATUS='" + request.args['status'] + "'"
 
         ret, msg = db.update_database(dbname, "guest", updatestring, "NAME='" + request.args['emailid'] + "'")
