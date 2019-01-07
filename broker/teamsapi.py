@@ -136,7 +136,7 @@ def sendmessagetoroom(url,token,roomid,message):
     headers = {'Authorization': 'Bearer {}'.format(token),
             'content-type': 'application/json'}
 
-    bodydetails = '{"roomId": "'+roomid+'","text":"'+message+'"}'
+    bodydetails = '{"roomId": "'+roomid+'","markdown":"'+message+'"}'
 
     try:
         resp = requests.request("POST",apistring, headers=headers,data=bodydetails)

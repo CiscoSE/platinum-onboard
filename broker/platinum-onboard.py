@@ -283,6 +283,19 @@ def generateguestaccount():
         teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "We have initiated the creation of the guest wireless account for "+emailaddress)
         teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Please give us a few moments until your account is provisioned")
 
+        print ("Inserting into DataBase")
+        ret, msg = db.insert_into_database(dbname, "guest", NAME=emailaddress, DEVICE=deviceid, STATUS="initiated", TEAMSROOMID=roomId)
+        print (str(ret))
+        print (str(msg))
+
+        if (not ret):
+            # There was an issue with inserting the record.   This is a problem since we should role back the creation.
+            print("Unable to insert the record")
+            return (jsonify({"result":msg}))
+        else:
+            print ("Successful insertion of record")
+            # This was successful
+
 
         print ("Triggering Guest Creation of '"+emailaddress+"' from device '"+deviceid+"' to "+provisionip)
 
@@ -291,32 +304,26 @@ def generateguestaccount():
         # Set up the Headers based upon the Tropo API
 
         # Post the API call to the tropo API using the payload and headers defined above
-        try:
-            resp = requests.get(apistring)
+#        try:
 
-        except requests.exceptions.RequestException as e:
-            print("Exception Occurred: "+e)
-            return (jsonify({"result": e}))
+        resp = requests.post(apistring)
+        print(str(resp))
 
-        if resp.status_code == 200:
-            print (resp.text)
+#        except requests.exceptions.RequestException as e:
+#            print("Exception Occurred: "+e)
+#            return (jsonify({"result": e}))
 
-        else:
-            return (jsonify({"result": "unable to send message to provisioning server"}))
+#        if resp.status_code == 200:
+#            print ("Successful send to Jason")
+#            print (resp.text)
+#        else:
+#            print ("Unable to send to Jason)")
+#            return (jsonify({"result": "unable to send message to provisioning server"}))
 
-
-
-        ret, msg = db.insert_into_database(dbname, "guest", NAME=emailaddress, DEVICE=deviceid, STATUS="initiated", TEAMSROOMID=roomId)
-
-
-        if (not ret):
-            # There was an issue with inserting the record.   This is a problem since we should role back the creation.
-            return (jsonify({"result":msg}))
-        else:
-            # This was successful
-            return (jsonify({"result": "success","record_id":msg}))
+        return (jsonify({"result": "success", "record_id": msg}))
 
     else:
+        print ("Wrong Parameters")
         return (jsonify({"result": "wrong paramters"}))
 
 @app.route('/api/status-guest-account',methods=['GET'])
@@ -355,6 +362,7 @@ def updatestatusguestaccount():
 
                 updatestring="STATUS='" + request.args['status'] + "', GUESTPASSWORD='"+request.args['guestpassword']+"'"
                 print (updatestring)
+                print(emailid)
                 ret, msg = db.search_database(dbname, "guest", "name", emailid)
                 print(str(msg))
                 print(str(ret))
@@ -366,7 +374,13 @@ def updatestatusguestaccount():
                     ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
                                                      "Congratulations, Your account was successfully created!")
                     ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
-                                                    "Your guest wireless password is: "+request.args['guestpassword'])
+                                                     "Guest Credentials are located below:")
+                    ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                    "ssid: **_platinum-guest_**")
+                    ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                    "username: **_"+emailid+"_**")
+                    ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                    "password: **_"+request.args['guestpassword']+"_**")
                 else:
                     print("(Email id Found)")
                     return (jsonify({"result": "emailid not found"}))
