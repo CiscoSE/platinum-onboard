@@ -354,9 +354,10 @@ def updatestatusguestaccount():
                 print ("Guest Password:"+request.args['guestpassword'])
 
                 updatestring="STATUS='" + request.args['status'] + "', GUESTPASSWORD='"+request.args['guestpassword']+"'"
-
+                print (updatestring)
                 ret, msg = db.search_database(dbname, "guest", "name", emailid)
                 print(str(msg))
+                print(str(ret))
 
 
                 if ret:
@@ -367,7 +368,7 @@ def updatestatusguestaccount():
                     ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
                                                     "Your guest wireless password is: "+request.args['guestpassword'])
                 else:
-                    print("Email id Found)")
+                    print("(Email id Found)")
                     return (jsonify({"result": "emailid not found"}))
 
 
