@@ -50,6 +50,7 @@ except:
     print("Error: Required items are not present in the configuration file.")
     exit(-1)
 
+
 print("teamstoken : {HIDDEN}")
 print("listenip: "+listenip)
 print("listenport: "+listenport)
@@ -125,6 +126,23 @@ def clearguesttable():
     if ret:
         guestmsg="Deleted"
     return render_template("clear-tables.html", guest=guestmsg,domain="Not Deleted",device="Not Deleted")
+
+@app.route('/clear-domaintable')
+def cleardomaintable():
+
+    ret,domainmsg = db.delete_database(dbname, "domain", "")
+    if ret:
+        domainmsg="Deleted"
+    return render_template("clear-tables.html", guest="Not Deleted",domain=domainmsg,device="Not Deleted")
+
+@app.route('/clear-devicetable')
+def cleardevicetable():
+
+    ret,devicemsg = db.delete_database(dbname, "device", "")
+    if ret:
+        devicemsg="Deleted"
+    return render_template("clear-tables.html", guest="Not Deleted",domain="Not Deleted",device=devicemsg)
+
 
 @app.route('/add-device')
 def dispdeviceadd():
