@@ -339,10 +339,15 @@ def updatestatusguestaccount():
 
     if ('emailid' in request.args) and ('status' in request.args):
 
+
         emailid = request.args['emailid']
 
+        print("Emailid: "+emailid)
+
         if request.args['status']=="completed":
+            print ("Status passed to function is completed")
             if ('guestpassword' not in request.args):
+                print ("Guestpassword is not passed to the function")
                 return(jsonify({"result":"no guest password"}))
             else:
 
@@ -351,6 +356,8 @@ def updatestatusguestaccount():
                 updatestring="STATUS='" + request.args['status'] + "', GUESTPASSWORD='"+request.args['guestpassword']+"'"
 
                 ret, msg = db.search_database(dbname, "guest", "name", emailid)
+                print(str(msg))
+
 
                 if ret:
                     print (str(msg))
@@ -360,13 +367,16 @@ def updatestatusguestaccount():
                     ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
                                                     "Your guest wireless password is: "+request.args['guestpassword'])
                 else:
+                    print("Email id Found)")
                     return (jsonify({"result": "emailid not found"}))
 
 
         else:
+            print ("else on update string")
             updatestring = "STATUS='" + request.args['status'] + "'"
 
         ret, msg = db.update_database(dbname, "guest", updatestring, "NAME='" + request.args['emailid'] + "'")
+        print (str(msg))
 
         return (jsonify({"result":ret}))
     else:
