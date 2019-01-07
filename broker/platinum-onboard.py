@@ -92,19 +92,16 @@ def apphealth():
 @app.route('/list-domain')
 def listdomain():
     data = db.search_db(dbname, "domain")
-    print (data)
     return render_template("list-domain.html", rows=data)
 
 @app.route('/list-device')
 def listdevice():
     data = db.search_db(dbname, "device")
-    print (data)
     return render_template("list-device.html", rows=data)
 
 @app.route('/list-guest')
 def listguest():
     data = db.search_db(dbname, "guest")
-    print (data)
     return render_template("list-guest.html", rows=data)
 
 @app.route('/clear-tables')
@@ -233,7 +230,6 @@ def generateguestaccount():
     if WEBDEBUG:
         print_details(request)
 
-    print (request.args)
     if ('deviceid' in request.args) and ('teamsid' in request.args):
 
         # Determine if deviceid is in white list
@@ -251,9 +247,7 @@ def generateguestaccount():
 
         # Determine if emaildomain is in white list
         emailaddress=ret[0]
-        print(emailaddress)
         emaildomain=emailaddress.split("@")[1]
-        print (emaildomain)
 
         ret, msg = db.search_database(dbname, "domain", "name", emaildomain)
 
@@ -275,35 +269,33 @@ def generateguestaccount():
 
         # Trigger the initiation of the guest account create since the data is effective
 
-        print("Create WebEx Teams Room with the new Password!")
         ret=teamsapi.createteamsroom(teamsurl, teamstoken,"Platinum Onboard Guest Wireless "+str(date.today())+" - "+emailaddress)
         if ret == '':
             print("Unable to create the teams room")
         else:
             roomId = ret
 
-        print ("roomID="+roomId)
         ret=teamsapi.adduserstoroom(teamsurl, teamstoken,roomId,emailaddress)
         if ret == '':
             print("Unable to add people to the teams room")
 
-        ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Welcome to the Platinum Onboard Service")
-        ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "We have initiated the creation of the guest wireless account for "+emailaddress)
-        ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Please give us a few moments until your account is provisioned")
+        teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Welcome to the Platinum Onboard Service")
+        teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "We have initiated the creation of the guest wireless account for "+emailaddress)
+        teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Please give us a few moments until your account is provisioned")
 
 
         print ("Triggering Guest Creation of '"+emailaddress+"' from device '"+deviceid+"' to "+provisionip)
 
-
-        apistring = "http://64.121.80.249:8444/api/check-guest.php?emailid="+emailaddress
+        apistring = "http://"+provisionip+"/api/check-guest.php?emailid="+emailaddress
         print ("Sending API to trigger guest creation: "+apistring)
         # Set up the Headers based upon the Tropo API
 
         # Post the API call to the tropo API using the payload and headers defined above
         try:
             resp = requests.get(apistring)
+
         except requests.exceptions.RequestException as e:
-            print(e)
+            print("Exception Occurred: "+e)
             return (jsonify({"result": e}))
 
         if resp.status_code == 200:
@@ -358,14 +350,17 @@ def updatestatusguestaccount():
 
                 updatestring="STATUS='" + request.args['status'] + "', GUESTPASSWORD='"+request.args['guestpassword']+"'"
 
-                print ("Emailid="+emailid)
                 ret, msg = db.search_database(dbname, "guest", "name", emailid)
-                print (msg['teamsroomid'])
 
-                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
-                                                 "Congratulations, Your account was successfully created!")
-                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
-                                                 "Your guest wireless password is: "+request.args['guestpassword'])
+                if ret:
+                    print (str(msg))
+
+                    ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                     "Congratulations, Your account was successfully created!")
+                    ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                    "Your guest wireless password is: "+request.args['guestpassword'])
+                else:
+                    return (jsonify({"result": "emailid not found"}))
 
 
         else:

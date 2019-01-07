@@ -5,7 +5,6 @@ import datetime
 
 def get_a_uuid():
     r_uuid = base64.urlsafe_b64encode(uuid.uuid4().bytes)
-    print(r_uuid)
     return str(r_uuid.decode('utf-8')).replace('=','')
 
 
@@ -77,17 +76,10 @@ def insert_into_database(dbname,table,**kwargs):
     #generate the current date for timestamps
     d=datetime.datetime.now()
 
-    print(kwargs)
-
     fieldnames,values = create_command_line(kwargs)
 
-    print (fieldnames)
-    print (values)
-
     insert="INSERT INTO "+table+" (ID,DATE,"+fieldnames+") VALUES ('"+id+"','"+str(d)+"',"+values+")"
-
-    print(insert)
-
+    print (insert)
     try:
         conn.execute(insert)
         conn.commit()
@@ -152,7 +144,7 @@ def search_database(dbname,table,field,value):
     conn = sqlite3.connect(dbname)
     curs = conn.cursor()
     select="SELECT * FROM "+table+ " WHERE "+field+"='"+value+"'"
-
+    print (select)
     curs.execute(select)
     names = list(map(lambda x: x[0], curs.description))
 
@@ -160,13 +152,11 @@ def search_database(dbname,table,field,value):
 
     final={}
     num_rows_fetched = len(data)
-    print(data)
     if num_rows_fetched<1:
         return(False,final)
     else:
         count=0
         for i in names:
-            print(i+" "+str(data[0][count]))
             final[i]=data[0][count]
 
             count = count + 1

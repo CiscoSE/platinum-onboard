@@ -60,7 +60,6 @@ def getdetailedinfofromid(url,token,personid):
     if resp.status_code == 200:
 
         message_dict = json.loads(resp.text)
-        print (message_dict)
         message_dict['statuscode'] = str(resp.status_code)
 
         return (message_dict['items'][0])
@@ -79,24 +78,18 @@ def createteamsroom(url,token,name):
 
     bodydetails = '{"title": "'+name+'"}'
 
-    print (apistring)
-    print(headers)
-    print (bodydetails)
     try:
         resp = requests.request("POST",apistring, headers=headers,data=bodydetails)
 
         message_dict = json.loads(resp.text)
-        print(message_dict)
-        print (resp)
     except requests.exceptions.RequestException as e:
-        print (e)
+
         return ''
 
 
     if resp.status_code == 200:
 
         message_dict = json.loads(resp.text)
-        print (message_dict)
 
         return (message_dict['id'])
     else:
@@ -114,15 +107,12 @@ def adduserstoroom(url,token,roomid,name):
 
     bodydetails = '{"roomId": "'+roomid+'","personEmail":"'+name+'"}'
 
-    print (apistring)
-    print(headers)
-    print (bodydetails)
+
     try:
         resp = requests.request("POST",apistring, headers=headers,data=bodydetails)
 
         message_dict = json.loads(resp.text)
-        print(message_dict)
-        print (resp)
+
     except requests.exceptions.RequestException as e:
         print (e)
         return ''
@@ -131,7 +121,7 @@ def adduserstoroom(url,token,roomid,name):
     if resp.status_code == 200:
 
         message_dict = json.loads(resp.text)
-        print (message_dict)
+
 
         return (message_dict['id'][0])
     else:
@@ -148,15 +138,11 @@ def sendmessagetoroom(url,token,roomid,message):
 
     bodydetails = '{"roomId": "'+roomid+'","text":"'+message+'"}'
 
-    print (apistring)
-    print(headers)
-    print (bodydetails)
     try:
         resp = requests.request("POST",apistring, headers=headers,data=bodydetails)
 
         message_dict = json.loads(resp.text)
-        print(message_dict)
-        print (resp)
+
     except requests.exceptions.RequestException as e:
         print (e)
         return ''
@@ -165,7 +151,6 @@ def sendmessagetoroom(url,token,roomid,message):
     if resp.status_code == 200:
 
         message_dict = json.loads(resp.text)
-        print (message_dict)
 
         return (message_dict['id'][0])
     else:
