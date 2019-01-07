@@ -257,70 +257,97 @@ def generateguestaccount():
 
         ret, msg = db.search_database(dbname, "guest", "name", emailaddress)
 
-        if (ret):
+        if (not ret):
+            # Trigger the initiation of the guest account create since the data is effective
+
+            ret=teamsapi.createteamsroom(teamsurl, teamstoken,"Platinum Onboard Guest Wireless "+str(date.today())+" - "+emailaddress)
+            if ret == '':
+                print("Unable to create the teams room")
+            else:
+                roomId = ret
+
+            ret=teamsapi.adduserstoroom(teamsurl, teamstoken,roomId,emailaddress)
+            if ret == '':
+                print("Unable to add people to the teams room")
+
+            teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId,
+                                            "--------------------------------------------------------")
+            teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "**Welcome to the Platinum Onboard Service**")
+            teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "We have initiated the creation of the guest wireless account for "+emailaddress)
+            teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Please give us a few moments until your account is provisioned")
+
+            print ("Inserting into DataBase")
+            ret, msg = db.insert_into_database(dbname, "guest", NAME=emailaddress, DEVICE=deviceid, STATUS="initiated", TEAMSROOMID=roomId)
+            print (str(ret))
+            print (str(msg))
+
+            if (not ret):
+                # There was an issue with inserting the record.   This is a problem since we should role back the creation.
+                print("Unable to insert the record")
+                return (jsonify({"result":msg}))
+            else:
+                print ("Successful insertion of record")
+                # This was successful
+
+
+            print ("Triggering Guest Creation of '"+emailaddress+"' from device '"+deviceid+"' to "+provisionip)
+
+            apistring = "http://"+provisionip+"/api/check-guest.php?emailid="+emailaddress
+            print ("Sending API to trigger guest creation: "+apistring)
+            # Set up the Headers based upon the Tropo API
+
+            # Post the API call to the tropo API using the payload and headers defined above
+    #        try:
+
+            resp = requests.post(apistring)
+            print(str(resp))
+
+    #        except requests.exceptions.RequestException as e:
+    #            print("Exception Occurred: "+e)
+    #            return (jsonify({"result": e}))
+
+    #        if resp.status_code == 200:
+    #            print ("Successful send to Jason")
+    #            print (resp.text)
+    #        else:
+    #            print ("Unable to send to Jason)")
+    #            return (jsonify({"result": "unable to send message to provisioning server"}))
+
+            return (jsonify({"result": "success", "record_id": msg}))
+
+        else:
+            # User already has an account:
+
+
             print(str(msg))
-            print ("User "+emailaddress+" already has a account initiated!")
+            print("User " + emailaddress + " already has a account initiated!")
 
-            if (msg['status']== 'initiated'):
+            ret, msg = db.search_database(dbname, "guest", "name", emailaddress)
 
+            if (msg['status'] == 'initiated'):
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "--------------------------------------------------------")
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "Your account request was already initiated!")
+                print ("Initiated")
                 return (jsonify({"result": "initiated"}))
             else:
-                return (jsonify({"result": "completed","password" : msg['guestpassword']}))
 
-        # Trigger the initiation of the guest account create since the data is effective
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "--------------------------------------------------------")
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "Your account was already provisioned:")
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "Guest Credentials are located below:")
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "ssid: **_platinum-guest_**")
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "username: **_" + emailaddress + "_**")
+                ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                 "password: **_" + msg['guestpassword'] + "_**")
 
-        ret=teamsapi.createteamsroom(teamsurl, teamstoken,"Platinum Onboard Guest Wireless "+str(date.today())+" - "+emailaddress)
-        if ret == '':
-            print("Unable to create the teams room")
-        else:
-            roomId = ret
-
-        ret=teamsapi.adduserstoroom(teamsurl, teamstoken,roomId,emailaddress)
-        if ret == '':
-            print("Unable to add people to the teams room")
-
-        teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Welcome to the Platinum Onboard Service")
-        teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "We have initiated the creation of the guest wireless account for "+emailaddress)
-        teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Please give us a few moments until your account is provisioned")
-
-        print ("Inserting into DataBase")
-        ret, msg = db.insert_into_database(dbname, "guest", NAME=emailaddress, DEVICE=deviceid, STATUS="initiated", TEAMSROOMID=roomId)
-        print (str(ret))
-        print (str(msg))
-
-        if (not ret):
-            # There was an issue with inserting the record.   This is a problem since we should role back the creation.
-            print("Unable to insert the record")
-            return (jsonify({"result":msg}))
-        else:
-            print ("Successful insertion of record")
-            # This was successful
-
-
-        print ("Triggering Guest Creation of '"+emailaddress+"' from device '"+deviceid+"' to "+provisionip)
-
-        apistring = "http://"+provisionip+"/api/check-guest.php?emailid="+emailaddress
-        print ("Sending API to trigger guest creation: "+apistring)
-        # Set up the Headers based upon the Tropo API
-
-        # Post the API call to the tropo API using the payload and headers defined above
-#        try:
-
-        resp = requests.post(apistring)
-        print(str(resp))
-
-#        except requests.exceptions.RequestException as e:
-#            print("Exception Occurred: "+e)
-#            return (jsonify({"result": e}))
-
-#        if resp.status_code == 200:
-#            print ("Successful send to Jason")
-#            print (resp.text)
-#        else:
-#            print ("Unable to send to Jason)")
-#            return (jsonify({"result": "unable to send message to provisioning server"}))
-
-        return (jsonify({"result": "success", "record_id": msg}))
+                print ("Guest Password is: "+ msg['guestpassword'])
+                return (jsonify({"result": "completed", "password": msg['guestpassword']}))
 
     else:
         print ("Wrong Parameters")
@@ -370,7 +397,8 @@ def updatestatusguestaccount():
 
                 if ret:
                     print (str(msg))
-
+                    ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
+                                                     "--------------------------------------------------------")
                     ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
                                                      "Congratulations, Your account was successfully created!")
                     ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
