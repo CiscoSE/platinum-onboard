@@ -8,6 +8,60 @@ Architecture:
 
 The broker micro-service leverages a REST API to communicate between the different services.  In addition, the broker micro-service provides a GUI to allow you to view and modify any of the data base tables that are used to store information.
 
+## Functional Details
+The broker micro-service will receive requests from external sources for process and provision guest wireless users.   The broker will not actually provision the users, but will make a call to some external entity to actually provision the users.   However, the following is a detail of the functions and how it works.
+
+#### Initiation of guest account
+The initiation of the guest account will begin with the REST API Call ```/api/generate-guest-account``` passed with both the ```deviceid``` that the request is coming from and the ```teamsid``` of the user that is requesting the guest account.   Once the broker receives the request it will validate the parameters against the security mechanism described below.   If the request passed the security checks, then broker will then update the WebEx Teams room with an update message and then send a request to the provisioning engine to complete the process.
+
+#### Security
+There is a very basic security model built into the application.   The broker will validate two pieces of information before a user can be provisioned Device ID and Email Domain.
+
+##### Device ID
+Since the broker will be responsible for receiving requests from end user devices (ie., Video Terminals or WebEx Boards), the broker will first determine if the request came from a valid device.   The broker has a database table that stores the deviceid of every device that is allowed to request guest accounts.   If the deviceid is not in the whitelist database, then the creation will fail.   You can leverage the  ```/api/post-endpoint-id``` REST API call or the GUI  to add new end points to the database.
+
+##### Email Domain
+Similar to the device, there is also a check as to the domain that the request is coming from.   Therefore, everyone's email domain must also be added. Similarly to the Device ID, a database table is used the house the white list domains.   You can leverage the ```/api/post-email-domain``` REST API call or the GUI to add new email domains to the database
+
+#### Completion of the guest account
+Once the provisioning engine is completed with the request, it will send a message to the broker to update the status to completed.   You can leverage the ```/api/update-status-guest-account``` REST API call with the status of ```completed``` and the guestpassword set to the password that is provisioned.   Once the broker retrieves this data everything is passed to the WebEx Teams Room and then the user will be successfully provisioned.
+
+## GUI
+A very simple GUI is provided to assist the user in performing maintenance on the system.   To open up the GUI, just point your web browser to the IP addresses that the broker is listening on.   For example: ```http://127.0.0.1:5000```
+
+### Main Screen
+The main screen provides both a Main Menu and a Top Menu for navigation.
+
+![Main Menu] (img/mainmenu.png)
+
+#### Main Menu
+The main manu will provide the main functions to maintain the database.   You can add data to tables, dump the tables and clear individual or all tables.
+
+#### Top Menu
+The top menu is a navigation menu that will show an about the software or take you back to the main menu.
+
+### Add to Device Table
+You can use the Add to Device Table to add new video devices to the whitelist table.
+![Add To Device Table] (img/addtodevice.png)
+
+### Add to Domain Table
+You can use the Add to Domain Table to add new email domains to the whitelist table.
+![Add To Domain Table] (img/addtodomain.png)
+
+### Dump the Device Table
+You can use the Dump Device Table to display the contents of the device table.
+![Dump Device Table] (img/dumpdevice.png)
+
+### Dump the Domain Table
+You can use the Dump Domain Table to display the contents of the domain table.
+![Dump Domain Table] (img/dumpdomain.png)
+
+### Dump the Guest Table
+You can use the Dump Guest Table to display the contents of the guest table.
+![Dump Guest Table] (img/dumpguest.png)
+
+
+
 ## Requirements
 The broker micro-service is written entirely in Python version 3.6.  The ```requirements.txt```file describes all the module dependencies that are required for the broker micro-service.
 
@@ -90,6 +144,18 @@ Initializing the database: platinum-onboard.sqlite
 All the following API calls can be made, but calling:
 
 ```http://{ip address}:{port}/api/{api call}&{parameter}={value}```
+
+As an example, if we want to add a domain to the white list, we POST following REST API call:
+
+```http://192.168.0.0.1:5000/api/post-email-domain?domain=cisco.com```
+
+Then we will retreive and JSON response which contains a unique identifier for the record that was inserted.
+
+```bash
+{
+    "result": "tzrjFnw0REGoJWmPHm8CFw"
+}
+```
 
 
 #### /api/get-user-by-id
