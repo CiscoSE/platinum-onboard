@@ -1,6 +1,6 @@
 [platinum-onboard]
 url: https://api.ciscospark.com
-token: {Insert Spark Token}
+token: {Insert WebEx Teams Token}
 listen-ip: {Insert IP to Listen on}
 listen-port: {Insert Port to Listen on}
 provision-ip: {Insert Provision IP Module}
