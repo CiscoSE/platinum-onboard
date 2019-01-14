@@ -9,7 +9,7 @@ include ('./functions.php');
 
 //read posted JSON data from codec's httpfeedback system
 $data = file_get_contents('php://input');
-//logit($data); //Used when debugging to see the full format of the data as its posted
+logit($data); //Used when debugging to see the full format of the data as its posted
 
 $event = json_decode($data,TRUE);
 //logit($event);//Used when debugging to see the full format of the data after converting to array
@@ -48,22 +48,39 @@ if($event['Event']['UserInterface']['Message']['Prompt']['Response']['OptionId']
 	$deviceId = $event['Event']['Identification']['SerialNumber']['Value'];
 	
 	if($result = create_user($userId,$deviceId)){
-		//logit($result); //to dump the reply content to log file
+	
 		$result = json_decode($result,true);
+		logit($result); //to dump the reply content to log file
 		$msg = $result['result'];
 		
 		switch ($msg) {
-			case 'initiated':
+			case 'success':
 				send_user_initiated($ip,$secureSessionId);
-				logit("A user account request with the teams id of: $userId has been initiated");
+				logit("A new user account request with the teams id of: $userId has been requested");
 				break;
 			case 'completed':
+				send_confirmation_message($ip,$SecuresessionId);
 				logit("A user with the teams id of: $userId is already provisioned");
 				break;
+			case 'initiated': 
+				send_confirmation_message($ip,$SecuresessionId);
+				logit("A user with the teams id of: $userId is activly being provisioned");
+				break;
+			case 'teamsid not found':
+				logit("The teams ID: $userId was not found in Webex Teams");
+				break;
+			case 'email domain not authorized':
+				logit("The email domain for this user is not authorized");
+				break;
+			case 'deviceid not authorized':
+				logit("The device sending the request is not authorized to do so");
+				break;
+
 			default:
 				logit("A user with the teams id of: $userId was requested with result code of: " . $msg);
 			break;
 		}
+
 		
 	}else{
 		logit("Failed to create user with teams id of: $userId \n\tVerify the Broker microservice is available");
