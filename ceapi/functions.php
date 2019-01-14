@@ -11,7 +11,6 @@ function logit($string){
 	if(is_array($string)){ $string = print_r($string,true);}
 	$timestamp = date("d/M/Y:H:i:s P");
 	file_put_contents("./log","[$timestamp] $string\n",FILE_APPEND);
-	//echo "test";
 }
 
 //better format array outputs on html pages
@@ -88,9 +87,11 @@ function get_paired_users($ip,$sessionId){
 	$output = curl_exec($ch);
 	curl_close($ch);
 	//pa($output);
-	$output = trim($output,'[]');
+	//$output = trim($output,'[]');
 	$data = json_decode($output,TRUE);
 	//pa($data);
+	logit("debug:\n" . print_r($output,true));
+	logit("debug:\n" . print_r($data,true));
 	return $data;
 }
 
@@ -100,22 +101,37 @@ function send_confirm_options_popup($ip,$sessionId,$users=array()){
 	$url = "https://$ip/putxml";  
 	$ch = curl_init();  
 	$string = 
-	'<Command>
+	"<Command>
 		<UserInterface>
 			<Message>
 				<Prompt>
 					<Display>
-						<Duration>60</Duration>
-						<FeedbackId>' . $users['UserId']['Value'] . '</FeedbackId>
-						<Option.1>I am NOT</Option.1>
-						<Option.2>Yes, I am ' . $users['Name']['Value'] . '</Option.2>
-						<Text>Are you ' . $users['Name']['Value'] . '?</Text>
-						<Title>Please Confirm Your Identity</Title>
+						<Duration>30</Duration>
+						<FeedbackId>"; $string.= $users[0]['UserId']['Value']; $string.= "</FeedbackId>
+						<Option.1>I am NOT Listed</Option.1>";
+						//pa($users);
+						/*
+						$i = 2;
+						foreach($users as $a=>$b){
+							$string .= "<Option.$i>" + $b['Name']['Value'] + "</Option.$i>\n";
+							//pa($b['Name']['Value']);
+							//pa($b);
+							//logit("Iteration $i" + print_r($a,true));
+							break;
+							$i++;
+						}
+						*/
+						//work around
+						$string .= "<Option.2>"; $string .= $users[0]['Name']['Value']; $string .= "</Option.2>";
+						
+						
+						$string .= '<Text>Are you Listed?</Text>';
+						$string .= "<Title>Please Confirm Your Identity</Title>
 					</Display>
 				</Prompt>
 			</Message>
 		</UserInterface>
-	</Command>';
+	</Command>";
 	
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array("Cookie: SecureSessionId=$sessionId"));
 	curl_setopt($ch, CURLOPT_URL, $url); 
@@ -127,6 +143,8 @@ function send_confirm_options_popup($ip,$sessionId,$users=array()){
 
 	$output = curl_exec($ch);
 	
+	//logit($string);
+	//logit($output);
 	return $output;
 }
 
@@ -165,8 +183,45 @@ function send_no_webex_pair($ip,$sessionId){
 	return $output;
 }
 
+//sends a message indicating the the user creation request was successful
+function send_confirmation_message($ip,$sessionId){
+	global $username; global $password;
+	$url = "https://$ip/putxml";  
+	$ch = curl_init();  
+	$string = 
+	'<Command>
+		<UserInterface>
+			<Message>
+				<Prompt>
+					<Display>
+						<Duration>15</Duration>
+						<FeedbackId>user_created</FeedbackId>
+						<Option.1>Ok</Option.1>
+						<Text>Please look for a new Space in Webex Teams with network credentials Shortly.</Text>
+						<Title>Your Access Request Has Been Recieved and is Being Processed.</Title>
+					</Display>
+				</Prompt>
+			</Message>
+		</UserInterface>
+	</Command>';
+	 
+	curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array("Cookie: SecureSessionId=$sessionId"));
+	curl_setopt($ch, CURLOPT_URL, $url); 
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+	curl_setopt($ch, CURLOPT_HEADER, array('Content-Type:application/xml'));  
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $string);	
 
-//sends a message that the user is already initiated
+	$output = curl_exec($ch);
+	//logit("Debug: CONFIRM CREATE");
+	//logit($output);
+	return $output;
+}
+
+
+//sends a message that the new user request has been initiated
 function send_user_initiated($ip,$sessionId){
 
 	$url = "https://$ip/putxml";  
@@ -180,8 +235,8 @@ function send_user_initiated($ip,$sessionId){
 						<Duration>15</Duration>
 						<FeedbackId>user_initiated</FeedbackId>
 						<Option.1>Ok</Option.1>
-						<Text>Your user account request has already been initiated.  You will recieve a message in Webex Teams when it has been provisioned.</Text>
-						<Title>User Already Initiated</Title>
+						<Text>Your new user account request has been initiated.  You will recieve a message in Webex Teams when it has been provisioned.</Text>
+						<Title>User Account Submitted</Title>
 					</Display>
 				</Prompt>
 			</Message>
@@ -222,6 +277,7 @@ function create_user($userId,$deviceId){
 	curl_close($ch);
 	
 	return $output;
+	//logit("debug:\n" . print_r($output,true));
 	
 }
 
