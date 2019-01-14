@@ -6,9 +6,10 @@ from utilities import print_details
 from flask import Flask,jsonify,request,render_template
 import db
 
-print ("Platinum Onboard Engine Starting...\n")
+print("Platinum Onboard Engine Starting...\n")
 
 print("Configuration Options:")
+
 app = Flask(__name__,static_url_path='/static')
 
 # Open up the configuration file and get all application defaults
@@ -27,7 +28,7 @@ except configparser.NoOptionError:
     # Defaulting to the standard Spark API
     teamsurl = "https://api.ciscospark.com"
 
-print ("teamsurl: "+teamsurl)
+print("teamsurl: "+teamsurl)
 
 # This flag turns on debugging of the web messages hitting the flask server
 try:
@@ -61,12 +62,13 @@ print("provision-ip: "+provisionip)
 dbname="platinum-onboard.sqlite"
 database = db.initialize_database(dbname)
 if database == False:
-    print ("Error: Unable to initialize the database.")
+    print("Error: Unable to initialize the database.")
     exit(-1)
 
 #
 # Main Program Logic
 #
+
 
 # Route Point for generic message when web server is hit.
 @app.route('/')
@@ -75,6 +77,7 @@ def home():
     if WEBDEBUG:
         print_details(request)
     return render_template('home.html')
+
 
 @app.route('/about')
 def about():
@@ -90,20 +93,24 @@ def apphealth():
         print_details(request)
     return jsonify({"health":"running"})
 
+
 @app.route('/list-domain')
 def listdomain():
     data = db.search_db(dbname, "domain")
     return render_template("list-domain.html", rows=data)
+
 
 @app.route('/list-device')
 def listdevice():
     data = db.search_db(dbname, "device")
     return render_template("list-device.html", rows=data)
 
+
 @app.route('/list-guest')
 def listguest():
     data = db.search_db(dbname, "guest")
     return render_template("list-guest.html", rows=data)
+
 
 @app.route('/clear-tables')
 def cleartables():
@@ -119,6 +126,7 @@ def cleartables():
         devicemsg="Deleted"
     return render_template("clear-tables.html", guest=guestmsg,domain=domainmsg,device=devicemsg)
 
+
 @app.route('/clear-guesttable')
 def clearguesttable():
 
@@ -127,6 +135,7 @@ def clearguesttable():
         guestmsg="Deleted"
     return render_template("clear-tables.html", guest=guestmsg,domain="Not Deleted",device="Not Deleted")
 
+
 @app.route('/clear-domaintable')
 def cleardomaintable():
 
@@ -134,6 +143,7 @@ def cleardomaintable():
     if ret:
         domainmsg="Deleted"
     return render_template("clear-tables.html", guest="Not Deleted",domain=domainmsg,device="Not Deleted")
+
 
 @app.route('/clear-devicetable')
 def cleardevicetable():
@@ -174,6 +184,7 @@ def adddomain():
 
     return render_template("result.html",msg = msg)
 
+
 # Returns a json representing the email address given a teamsid
 @app.route('/api/get-user-by-id', methods=['GET'])
 def getuserbyid():
@@ -182,19 +193,21 @@ def getuserbyid():
 
     if 'teamsid' not in request.args:
         return (jsonify({"result": "no parameter"}))
-    return(jsonify(email=teamsapi.getemailfromid(teamsurl, teamstoken, request.args['teamsid'])))
+    return jsonify(email=teamsapi.getemailfromid(teamsurl, teamstoken, request.args['teamsid']))
+
 
 # Returns a json representing the detailed information given a teamsid
 @app.route('/api/get-detailed-info-by-id', methods=['GET'])
 def getdetailedinfo():
 
     if WEBDEBUG:
-        print ("Debugging")
+        print("Debugging")
         print_details(request)
 
     if 'teamsid' not in request.args:
-        return (jsonify({"result": "no parameter"}))
-    return(jsonify(teamsapi.getdetailedinfofromid(teamsurl, teamstoken, request.args['teamsid'])))
+        return jsonify({"result": "no parameter"})
+    return jsonify(teamsapi.getdetailedinfofromid(teamsurl, teamstoken, request.args['teamsid']))
+
 
 # Returns a json representing if the email domain is in the white list database
 @app.route('/api/get-email-domain', methods=['GET'])
@@ -203,10 +216,11 @@ def getemaildomain():
         print_details(request)
 
     if 'domain' not in request.args:
-        return (jsonify({"result": "no parameter"}))
+        return jsonify({"result": "no parameter"})
 
     ret,msg = db.search_database(dbname, "domain", "name", request.args['domain'])
-    return (jsonify({"result": msg}))
+    return jsonify({"result": msg})
+
 
 # Adds a domain to the white list database
 @app.route('/api/post-email-domain', methods=['POST'])
@@ -214,10 +228,10 @@ def postemaildomain():
     if WEBDEBUG:
         print_details(request)
     if 'domain' not in request.args:
-        return (jsonify({"result": "no parameter"}))
+        return jsonify({"result": "no parameter"})
     ret,msg= db.insert_into_database(dbname, "domain", NAME=request.args['domain'])
 
-    return(jsonify({"result":msg}))
+    return jsonify({"result":msg})
 
 
 # Returns a json representing if the endpoint id is in the white list database
@@ -226,10 +240,11 @@ def getendpointid():
     if WEBDEBUG:
         print_details(request)
     if 'deviceid' not in request.args:
-        return (jsonify({"result": "no parameter"}))
+        return jsonify({"result": "no parameter"})
     ret,msg = db.search_database(dbname, "device", "name", request.args['deviceid'])
 
-    return(jsonify({"result":msg}))
+    return jsonify({"result":msg})
+
 
 # Adds a device id to the white list database
 @app.route('/api/post-endpoint-id', methods=['POST'])
@@ -238,10 +253,11 @@ def postendpointid():
         print_details(request)
 
     if 'deviceid' not in request.args:
-        return (jsonify({"result": "no parameter"}))
+        return jsonify({"result": "no parameter"})
     ret, msg = db.insert_into_database(dbname, "device", NAME=request.args['deviceid'])
 
-    return (jsonify({"result": msg}))
+    return jsonify({"result": msg})
+
 
 @app.route('/api/generate-guest-account',methods=['POST'])
 def generateguestaccount():
@@ -255,13 +271,13 @@ def generateguestaccount():
         deviceid=request.args['deviceid']
         ret, msg = db.search_database(dbname, "device", "name", deviceid)
 
-        if (not ret):
-            return(jsonify({"result": "deviceid not authorized"}))
+        if not ret:
+            return jsonify({"result": "deviceid not authorized"})
 
         ret= teamsapi.getemailfromid(teamsurl, teamstoken, request.args['teamsid'])
 
         if ret=="":
-            return (jsonify({"result": "teamsid not found"}))
+            return jsonify({"result": "teamsid not found"})
 
         # Determine if emaildomain is in white list
         emailaddress=ret[0]
@@ -270,7 +286,7 @@ def generateguestaccount():
         ret, msg = db.search_database(dbname, "domain", "name", emaildomain)
 
         if (not ret):
-            return (jsonify({"result": "email domain not authorized"}))
+            return jsonify({"result": "email domain not authorized"})
 
 
         ret, msg = db.search_database(dbname, "guest", "name", emailaddress)
@@ -294,24 +310,24 @@ def generateguestaccount():
             teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "We have initiated the creation of the guest wireless account for "+emailaddress)
             teamsapi.sendmessagetoroom(teamsurl, teamstoken, roomId, "Please give us a few moments until your account is provisioned")
 
-            print ("Inserting into DataBase")
+            print("Inserting into DataBase")
             ret, msg = db.insert_into_database(dbname, "guest", NAME=emailaddress, DEVICE=deviceid, STATUS="initiated", TEAMSROOMID=roomId)
-            print (str(ret))
-            print (str(msg))
+            print(str(ret))
+            print(str(msg))
 
             if (not ret):
                 # There was an issue with inserting the record.   This is a problem since we should role back the creation.
                 print("Unable to insert the record")
                 return (jsonify({"result":msg}))
             else:
-                print ("Successful insertion of record")
+                print("Successful insertion of record")
                 # This was successful
 
 
-            print ("Triggering Guest Creation of '"+emailaddress+"' from device '"+deviceid+"' to "+provisionip)
+            print("Triggering Guest Creation of '"+emailaddress+"' from device '"+deviceid+"' to "+provisionip)
 
             apistring = "http://"+provisionip+"/api/check-guest.php?emailid="+emailaddress
-            print ("Sending API to trigger guest creation: "+apistring)
+            print("Sending API to trigger guest creation: "+apistring)
             # Set up the Headers based upon the Tropo API
 
             # Post the API call to the tropo API using the payload and headers defined above
@@ -325,13 +341,13 @@ def generateguestaccount():
     #            return (jsonify({"result": e}))
 
     #        if resp.status_code == 200:
-    #            print ("Successful send to Jason")
-    #            print (resp.text)
+    #            print("Successful send to Jason")
+    #            print(resp.text)
     #        else:
-    #            print ("Unable to send to Jason)")
+    #            print("Unable to send to Jason)")
     #            return (jsonify({"result": "unable to send message to provisioning server"}))
 
-            return (jsonify({"result": "success", "record_id": msg}))
+            return jsonify({"result": "success", "record_id": msg})
 
         else:
             # User already has an account:
@@ -347,8 +363,8 @@ def generateguestaccount():
                                                  "--------------------------------------------------------")
                 ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
                                                  "Your account request was already initiated!")
-                print ("Initiated")
-                return (jsonify({"result": "initiated"}))
+                print("Initiated")
+                return jsonify({"result": "initiated"})
             else:
 
                 ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
@@ -364,12 +380,13 @@ def generateguestaccount():
                 ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
                                                  "password: **_" + msg['guestpassword'] + "_**")
 
-                print ("Guest Password is: "+ msg['guestpassword'])
-                return (jsonify({"result": "completed", "password": msg['guestpassword']}))
+                print("Guest Password is: "+ msg['guestpassword'])
+                return jsonify({"result": "completed", "password": msg['guestpassword']})
 
     else:
-        print ("Wrong Parameters")
-        return (jsonify({"result": "wrong paramters"}))
+        print("Wrong Parameters")
+        return jsonify({"result": "wrong paramters"})
+
 
 @app.route('/api/status-guest-account',methods=['GET'])
 def statusguestaccount():
@@ -377,12 +394,13 @@ def statusguestaccount():
         print_details(request)
 
     if 'email' not in request.args:
-        return (jsonify({"result": "no parameter"}))
+        return jsonify({"result": "no parameter"})
     else:
         emailaddress = request.args['email']
         ret, msg = db.search_database(dbname, "guest", "name", emailaddress)
 
-        return (jsonify({"result":msg}))
+        return jsonify({"result":msg})
+
 
 @app.route('/api/update-status-guest-account',methods=['POST'])
 def updatestatusguestaccount():
@@ -397,16 +415,16 @@ def updatestatusguestaccount():
         print("Emailid: "+emailid)
 
         if request.args['status']=="completed":
-            print ("Status passed to function is completed")
+            print("Status passed to function is completed")
             if ('guestpassword' not in request.args):
-                print ("Guestpassword is not passed to the function")
-                return(jsonify({"result":"no guest password"}))
+                print("Guestpassword is not passed to the function")
+                return jsonify({"result":"no guest password"})
             else:
 
-                print ("Guest Password:"+request.args['guestpassword'])
+                print("Guest Password:"+request.args['guestpassword'])
 
                 updatestring="STATUS='" + request.args['status'] + "', GUESTPASSWORD='"+request.args['guestpassword']+"'"
-                print (updatestring)
+                print(updatestring)
                 print(emailid)
                 ret, msg = db.search_database(dbname, "guest", "name", emailid)
                 print(str(msg))
@@ -414,7 +432,7 @@ def updatestatusguestaccount():
 
 
                 if ret:
-                    print (str(msg))
+                    print(str(msg))
                     ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
                                                      "--------------------------------------------------------")
                     ret = teamsapi.sendmessagetoroom(teamsurl, teamstoken, msg['teamsroomid'],
@@ -429,19 +447,19 @@ def updatestatusguestaccount():
                                                     "password: **_"+request.args['guestpassword']+"_**")
                 else:
                     print("(Email id Found)")
-                    return (jsonify({"result": "emailid not found"}))
+                    return jsonify({"result": "emailid not found"})
 
 
         else:
-            print ("else on update string  ")
+            print("else on update string  ")
             updatestring = "STATUS='" + request.args['status'] + "'"
 
         ret, msg = db.update_database(dbname, "guest", updatestring, "NAME='" + request.args['emailid'] + "'")
-        print (str(msg))
+        print(str(msg))
 
-        return (jsonify({"result":ret}))
+        return jsonify({"result":ret})
     else:
-        return (jsonify({"result":"wrong paramters"}))
+        return jsonify({"result":"wrong paramters"})
 
 
 if __name__ == '__main__':
