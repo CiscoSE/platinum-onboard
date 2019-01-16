@@ -12,6 +12,9 @@ Onboarding guest onto a network has been made simpler over the years by advances
 * Once a user has been successfuly onboarded, the host company has little visibility of what the user has been doing.
 * Users get frustrated so they start using hotspots or cell phones for accessing networks.
 
+![Frustration](img/frustration.jpg)
+
+
 These are just several of the problems that are associated with onboarding guest users.   Contractor access is even more problematic since they are onsite so infrequently, so IT departments often have to reenable the contractors credentials at each visit.  Even worse, IT departments attempt to avoid this by giving the contractor an account with credentials permanently enabled with no password 60 or 90 day age restrictions.  The problems are even made worse when the amount of guest users increase.   For example, at a customer trade show when there could be thousands of guest or contractor users. 
 
 With the increase of technological features, there must be a better solution to address this problem!
