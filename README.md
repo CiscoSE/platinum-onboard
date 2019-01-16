@@ -34,7 +34,7 @@ By combining these best of bread products together, customers can enjoy much mor
 
 ### Cisco Products Technologies/ Services
 
-Our solution will levegerage the following Cisco technologies
+Our solution leverages the following Cisco technologies:
 
 *  [WebEx Teams](https://www.webex.com/products/teams/index.html)
 *  [WebEx Room Series](https://www.cisco.com/c/en/us/products/collaboration-endpoints/webex-room-series/index.html)
@@ -45,7 +45,6 @@ Our solution will levegerage the following Cisco technologies
 
 ## Team Members
 
-
 * Chris Bogdon <cbogdon@cisco.com> - Trans PNC Enterprise Account
 * Jason Beltrame <jabeltra@cisco.com> - Greater Pennsylvania Territory
 * Adam Schaeffer <adschaef@cisco.com> - Philadelphia Metro Territory
@@ -53,28 +52,60 @@ Our solution will levegerage the following Cisco technologies
 
 ## Solution Components
 
+Our solution provides three main components.   The architecture is built aound a microservices framework to demonstrate how multiple solutions can work together as long as there is a well defined API.   The overall architecture is shown below:
 
-<!-- This does not need to be completed during the initial submission phase  
+![Architecture](img/architecture.png)
 
-Provide a brief overview of the components involved with this project. e.g Python /  -->
+There are three main modules in the solution.   They are described below:
 
+### CE-API
+**TODO**
+
+### broker
+The broker is responsible for receiving requests from the CE-API to provision guest users.   It uses a database to whitelist both video endpoints and email domains to provide a very simple security mechanism. 
+
+The broker, will perform the following functions:
+1. Wait for requests from the CE-API to provision a user
+2. Validate any received requests against the security white-list database
+3. Store the requests in an internal database for later tracking
+4. Leverage the REST-API to initiate the actual provisioning process with the guest-update.
+5. Wait for reponse from guest-update for a wifi password
+6. Provide status updates to the end user in a WebEx Teams Room
+
+### guest-update
+**TODO**
 
 ## Usage
 
-<!-- This does not need to be completed during the initial submission phase  
+### Prerequisite
+Besides having the modules configured appropriately, the end user will be required to have a Cisco WebEx Teams Account and WebEx Teams installed on their mobile device.    To set up a free WebEx Teams Account, you can go to the following link: [WebEx Teams](https://www.webex.com/pricing/free-trial.html?sp=wt)
 
-Provide a brief overview of how to use the solution  -->
+To download the WebEx Teams application, you can click on the following links:
+
+**Apple IOS**
+
+[![AppStore](img/appstore.png)](https://itunes.apple.com/us/app/cisco-webex-teams/id833967564?mt=8)
+
+**Android**
+
+[![GooglePlay](img/googleplay.png)](https://play.google.com/store/apps/details?id=com.cisco.wx2.android&hl=en_US)
+
+### Overall Flow
 
 
 
 ## Installation
 
-How to install or setup the project for use.
+Since there are three distinct modules required, the detailed information for installation is included in the documentation links provided in the next section.
 
 
 ## Documentation
 
-Pointer to reference documentation for this project.
+More detailed information and documentation can be provided in the following links:
+
+* [CE-API](ceapi/README.md)
+* [broker](broker/README.md)
+* [guest-update](guest-update/README.md)
 
 
 ## License
