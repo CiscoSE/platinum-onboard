@@ -1,0 +1,3 @@
+apache2==2.4.34
+php==7.2.9-1
+Kali GNU/Linux=2018.4

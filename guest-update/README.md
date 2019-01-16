@@ -18,7 +18,31 @@ The Guest Update API is written in PHP.  The API runs on top of an Apache stack 
 Apache 2.4.34
 PHP 7.2.9-1
 
-## Apache and PHP Installation
+### Cisco Identity Services Engine ( ISE )
+Cisco Identity Services Engine is used for both the Guest User database as well as the radius server for both the authentication and authorization of the wireless guest users.  In our setup, we are using ISE version 2.4 Patch 5.  The wireless guest users are authenticating against the Guest User Database within ISE.  Once authenticated, they hit our authorization rules.  We have specific authorization rules that are setup per domain.  We match the username that is authenticated to the authorization rules.  Once hit, the rule then sets the appropriate roles by setting the Cisco av-pair radius attribute to the correct role based on that rule:
+
+  cisco-av-pair = role=guest-cisco
+
+Once authenticated and authorized, and user is now on the network with the appropriate security measures in place.
+
+## Optional Components
+The following are optional components, but we chose to include to make it a complete solution as would be installed within a customer environment
+
+#### Cisco Umbrella
+Used for content filtering based on the Guest's domain.  This would allow for per domain filtering policies.  I.E, cisco.com user would have a different Content filtering policy compared to another vendor.com.  Allows for more a strict security posture.
+
+#### Cisco Umbrella setup
+For our Cisco Umbrella setup, we have a policy predefined for each vendor that we would allow within our environment.  These policies are customized per vendor if we so chose.  This allows for maximum flexibility. These policies are assigned by the Cisco Wireless Lan Controller ( WLC ), which we will discuss how next.  Within Umbrella, these policies exist prior to any default catch all's to ensure they are hit based on the appropriate role.
+
+####Cisco Wireless Lan Controller ( WLC )
+The WLC was used in our environment as the wireless control system as well as mapping the Guest Users to Umbrella policies.  Some of this functionality is available on the Meraki side as well.
+
+#### Cisco Wireless Lan Controller
+In our environment, we used the Cisco WLC as our wireless controller.  Using the Cisco AV-Pair radius attribute, we could tag individual users to a particular role.  In our case, the role was their domain name.  On the WLC, we integrated our WLC to Umbrella using the Network Device API.  We created local policies on the WLC that mapped a role to an Umbrella policy.  This way, if a Cisco.com user came onto the network, it would take the role of Cisco.com automatically based on the role assigned by ISE.  Once the WLC would see that role, it would assign that user on the SSID the particular Umbrella policy that was predefined.
+
+## Setup of components
+
+#### Apache and PHP Installation
 Installing Apache and PHP will vary based on the distribution you are running it one.  In our case, we were running Kali Linux on a Raspberry Pi, so our installation instructions will be based on that.
 
 Once on the CLI of the Kali Linux server, you can perform the following steps to get Apache and PHP up and running:
@@ -70,30 +94,43 @@ Once on the CLI of the Kali Linux server, you can perform the following steps to
 
       http://IPADDRESS/api/guest-update.php
 
-### Cisco Identity Services Engine ( ISE )
-Cisco Identity Services Engine is used for both the Guest User database as well as the radius server for both the authentication and authorization of the wireless guest users.  In our setup, we are using ISE version 2.4 Patch 5.  The wireless guest users are authenticating against the Guest User Database within ISE.  Once authenticated, they hit our authorization rules.  We have specific authorization rules that are setup per domain.  We match the username that is authenticated to the authorization rules.  Once hit, the rule then sets the appropriate roles by setting the Cisco av-pair radius attribute to the correct role based on that rule:
+#### Identity Services Engine Setup
+For ISE, there needs to be authorization profiles setup to let ISE know what to do when something matches the authorization rule.  In our case, the result of that authorization rule match will assign the correct authorization profile.  This authorization profile just sets the role so that the WLC will be able to see which role that user gets.  Here is a screenshot of one of our authorization profiles:
 
-  cisco-av-pair = role=guest-cisco
+![ISE Authorization Profile](img/ISE-profile.png)
 
-Once authenticated and authorized, and user is now on the network with the appropriate security measures in place.
+The last portion to setup in ISE is the actual authorization profile.  There are lots of ways you can write your rules, but in our case, we match a specific SSID and also match against the domain in the username.  Below is a screenshot of our authorazation rules.  You can also see in this screenshot how we assign the profile as well:
 
-## Optional Components
-The following are optional components, but we chose to include to make it a complete solution as would be installed within a customer environment
+![ISE Authorization Policy Set](img/ISE-authz.png)
 
-#### Cisco Umbrella
-Used for content filtering based on the Guest's domain.  This would allow for per domain filtering policies.  I.E, cisco.com user would have a different Content filtering policy compared to another vendor.com.  Allows for more a strict security posture.
+#### Wireless Lan Controller ( WLC ) Setup
+The action item within the WLC setup is to tie our WLC to Umbrella via the Network Devices API.  Within Umbrella, you can generate that API token and then apply it within the WLC configuration.  Once that is complete, you then add all the profiles you want to have mapped.  This will autogenerate the identities within Umbrella now that we are speaking to it via the API.  Below is a screenshot of the Profiles we created:
 
-#### Cisco Umbrella setup
-For our Cisco Umbrella setup, we have a policy predefined for each vendor that we would allow within our environment.  These policies are customized per vendor if we so chose.  This allows for maximum flexibility. These policies are assigned by the Cisco Wireless Lan Controller ( WLC ), which we will discuss how next.  Within Umbrella, these policies exist prior to any default catch all's to ensure they are hit based on the appropriate role.
+![WLC OpenDNS Profile](img/WLC-odns.png)
 
-####Cisco Wireless Lan Controller ( WLC )
-The WLC was used in our environment as the wireless control system as well as mapping the Guest Users to Umbrella policies.  Some of this functionality is available on the Meraki side as well.
+Within the WLC, we setup local policies that matched the role we got from ISE.  We can then assign the specific Umbrella policy based on these local policies.  First, here is a screenshot of our local policies:
 
-#### Cisco Wireless Lan Controller
-In our environment, we used the Cisco WLC as our wireless controller.  Using the Cisco AV-Pair radius attribute, we could tag individual users to a particular role.  In our case, the role was their domain name.  On the WLC, we integrated our WLC to Umbrella using the Network Device API.  We created local policies on the WLC that mapped a role to an Umbrella policy.  This way, if a Cisco.com user came onto the network, it would take the role of Cisco.com automatically based on the role assigned by ISE.  Once the WLC would see that role, it would assign that user on the SSID the particular Umbrella policy that was predefined.
+![WLC Local Profile](img/WLC-localprofile.png)
+
+Each authorization rule in ISE ( or vendor we want to secure ) will have a corresponding local profile.  What these local profiles do is look for the role being assigned by the user/connection, and the assign the Umbrella policy.  Here is a screenshot of one of our Local Policies.  You can see we are looking for the Match Role String, as well as then assigning the OpenDNS Profile.
+
+![WLC Local Profile](img/WLC-localprofile.png)
+
+Finally, once that is all set, we just need to assign the policies to the SSID.  Below is a screenshot of the 3 policies assigned to the SSID in which our guest users will be connecting:
+
+![WLC SSID Policy](img/WLC-ssid-policy.png)
+
+At this point, the WLC is all setup.
+
+#### Umbrella Setup
+Umbrella setup is pretty minimal due to the API integration.  Since we have our WLC and our Umbrella instance integrated with the API, when policies got assigned in the WLC, Umbrella is authomatically provisioned with the Network Devices.  You can see our Umbrella instance here with the 3 device integration policies we created on the WLC:
+
+![Umbrella Device Listing](img/UMB-devicelist.png)
+
+From  here, you can assign the same, or different Umbrella policies on a per group level.  So if you wanted cisco.com users to have different access than leibert.com users, this is where you would do that.
 
 ## API Description
-All the following URL call can be made in the Guest User Inteface:
+All the following URL call can be made in the Guest User Interface:
 
 ```http://{ip address}:{port}/api/check-guest.php&emailid={value}```
 
