@@ -3,8 +3,8 @@
 ## Description
 The broker micro-service is responsible for receiving requests to provision users and then forwards these requests to the service responsible for provisioning users.    See the following picture on where it fits in the overall solution:
 
-Architecture:
-![Architecture] (img/architecture.png)
+**Architecture:**
+![Architecture](img/architecture.png)
 
 The broker micro-service leverages a REST API to communicate between the different services.  In addition, the broker micro-service provides a GUI to allow you to view and modify any of the data base tables that are used to store information.
 
