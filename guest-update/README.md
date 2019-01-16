@@ -18,6 +18,58 @@ The Guest Update API is written in PHP.  The API runs on top of an Apache stack 
 Apache 2.4.34
 PHP 7.2.9-1
 
+## Apache and PHP Installation
+Installing Apache and PHP will vary based on the distribution you are running it one.  In our case, we were running Kali Linux on a Raspberry Pi, so our installation instructions will be based on that.
+
+Once on the CLI of the Kali Linux server, you can perform the following steps to get Apache and PHP up and running:
+  1.  First get and install the Apache software
+    apt-get install apache2
+
+  2.  Once that is complete, make sure you have a working web server.  You can verify this by browsing to the IP address of the Apache server you just installed ( http://IPADDRESS )
+
+  3.  Once the Apache functionality is verified, you can then move onto PHP.  From the CLI, you can install PHP with the following command ( Note, in our case, it was PHP 7.2 )
+      apt-get install php7.2
+
+  4.  You may have some prompts you need to answer yes to, but once that is complete, you just need to restart Apache:
+      service apache2 restart
+
+  5.  Now that we have a working Apache and PHP stack, we setup our virtual directory for our PHP script.  In this case, we called it api, but it could be anything you want.  For our distribution, we went into our apache2 configuration directory ( /etc/apache2 ) and added a new conf file in both the conf-available and the conf-enabled.  In our case, we named the api.conf.  In our case, both files were the same, and contained the following:
+
+  <Directory /usr/share/api>
+      Options +FollowSymLinks
+      AllowOverride None
+      <IfVersion >= 2.3>
+              Require all granted
+      </IfVersion>
+      <IfVersion < 2.3>
+              Order Allow,Deny
+              Allow from all
+      </IfVersion>
+
+      AddType application/x-httpd-php .php
+
+      <IfModule mod_php.c>
+              php_flag magic_quotes_gpc Off
+              php_flag short_open_tag On
+              php_flag register_globals Off
+              php_flag register_argc_argv On
+              php_flag track_vars On
+              # this setting is necessary for some locales
+              php_value mbstring.func_overload 0
+              php_value include_path .
+      </IfModule>
+
+      DirectoryIndex index.php
+</Directory>
+
+  6.  Once those files are created and saved, we created the api directory under /usr/share, which is what our configuration documents pointed to.  Once that was complete, we restarted Apache2 again:
+
+      service apache2 restart
+
+  7.  We now placed our php file into that directory, and was able to browse it via the URL;
+
+      http://IPADDRESS/api/guest-update.php
+
 ### Cisco Identity Services Engine ( ISE )
 Cisco Identity Services Engine is used for both the Guest User database as well as the radius server for both the authentication and authorization of the wireless guest users.  In our setup, we are using ISE version 2.4 Patch 5.  The wireless guest users are authenticating against the Guest User Database within ISE.  Once authenticated, they hit our authorization rules.  We have specific authorization rules that are setup per domain.  We match the username that is authenticated to the authorization rules.  Once hit, the rule then sets the appropriate roles by setting the Cisco av-pair radius attribute to the correct role based on that rule:
 
