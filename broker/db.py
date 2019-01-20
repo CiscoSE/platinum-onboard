@@ -3,30 +3,54 @@ import uuid
 import base64
 import datetime
 
+
 def get_a_uuid():
+    """
+
+    @return: returns a uuid
+
+    This functions returns a unique uuid that can be used as indexing values.
+    """
     r_uuid = base64.urlsafe_b64encode(uuid.uuid4().bytes)
     return str(r_uuid.decode('utf-8')).replace('=','')
 
 
-def create_command_line (args):
+def create_command_line(args):
+    """
 
-    numparamsleft=len(args)
-    fieldnames=""
-    values=""
+    @param args:list of arguments
+    @return: the field names and values
 
+    This function will take an arbitrary list of field naes and values and properly create a string that is used to
+    insert the data into the database.
+    """
+
+    numparamsleft = len(args)
+    fieldnames = ""
+    values = ""
+
+    # For each key, value in the arguments, process each
     for key,value in args.items():
-        fieldnames=fieldnames+key
-        values=values+"'"+value+"'"
-        numparamsleft=numparamsleft-1
-        if numparamsleft>=1:
-            fieldnames=fieldnames+","
-            values=values+','
+        fieldnames = fieldnames+key
+        values = values+"'"+value+"'"
+        numparamsleft = numparamsleft-1
+        if numparamsleft >= 1:
+            fieldnames = fieldnames+","
+            values = values+','
 
     return fieldnames,values
 
 
 def initialize_database(dbname):
-    print ("Initializing the database: "+dbname)
+    """
+
+    @param dbname: name of the database
+    @return: nothing
+
+    This function will initialize a new database using the name specified in the paramter.   When completed, this
+    function will also close the database connection.
+    """
+    print("Initializing the database: "+dbname)
 
     try:
         conn = sqlite3.connect(dbname)
@@ -66,9 +90,17 @@ def initialize_database(dbname):
         return(False)
     conn.commit()
     conn.close()
-    return (conn)
+    return conn
+
 
 def insert_into_database(dbname,table,**kwargs):
+    """
+
+    @param dbname: name of the database
+    @param table: table that we want to insert the record into it
+    @param kwargs: variable number of arguments that represents the values we want to insert.
+    @return: the uuid of the new record that is inserted.
+    """
     conn = sqlite3.connect(dbname)
 
     #generate a unique ID
@@ -79,7 +111,7 @@ def insert_into_database(dbname,table,**kwargs):
     fieldnames,values = create_command_line(kwargs)
 
     insert="INSERT INTO "+table+" (ID,DATE,"+fieldnames+") VALUES ('"+id+"','"+str(d)+"',"+values+")"
-    print (insert)
+    print(insert)
     try:
         conn.execute(insert)
         conn.commit()
@@ -89,7 +121,16 @@ def insert_into_database(dbname,table,**kwargs):
     conn.close()
     return(True,id)
 
+
 def search_db(dbname,table):
+    """
+
+    @param dbname: name of the database
+    @param table: table to be used for the search
+    @return: the data that was retrieved
+
+    This function just performs a very simple select all from the table and returns the data
+    """
     conn = sqlite3.connect(dbname)
     conn.row_factory = sqlite3.Row
     curs = conn.cursor()
@@ -103,12 +144,22 @@ def search_db(dbname,table):
     return data
 
 def update_database(dbname,table,field,condition):
+    """
+
+    @param dbname: name of the database
+    @param table: table used to update
+    @param field: field to update
+    @param condition: the condition used to determine which record to update
+    @return:
+
+    This function will update a record in a database based upon the field and condition
+    """
 
     conn = sqlite3.connect(dbname)
 
     update_command = "UPDATE "+table+" SET "+field+" WHERE "+condition
 
-    print (update_command)
+    print(update_command)
     try:
         conn.execute(update_command)
         conn.commit()
@@ -120,6 +171,15 @@ def update_database(dbname,table,field,condition):
 
 
 def delete_database(dbname,table,condition):
+    """
+
+    @param dbname: name of the database
+    @param table: table to delete
+    @param condition: condition to determine which record to delete
+    @return:
+
+    Deletes a row from a table which matches the condition
+    """
 
     delete_command = "DELETE FROM "+table
     if condition != "":
@@ -140,11 +200,20 @@ def delete_database(dbname,table,condition):
     conn.close()
     return(True,id)
 
+
 def search_database(dbname,table,field,value):
+    """
+
+    @param dbname: name of the database
+    @param table: table to search
+    @param field: field that we are using to search
+    @param value: value that we want to search for
+    @return: True or False if the command was executed correctly and if True, then return the data
+    """
     conn = sqlite3.connect(dbname)
     curs = conn.cursor()
     select="SELECT * FROM "+table+ " WHERE "+field+"='"+value+"'"
-    print (select)
+    print(select)
     curs.execute(select)
     names = list(map(lambda x: x[0], curs.description))
 
