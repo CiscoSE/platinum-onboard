@@ -40,8 +40,97 @@ The WLC was used in our environment as the wireless control system as well as ma
 #### Cisco Wireless Lan Controller
 In our environment, we used the Cisco WLC as our wireless controller.  Using the Cisco AV-Pair radius attribute, we could tag individual users to a particular role.  In our case, the role was their domain name.  On the WLC, we integrated our WLC to Umbrella using the Network Device API.  We created local policies on the WLC that mapped a role to an Umbrella policy.  This way, if a Cisco.com user came onto the network, it would take the role of Cisco.com automatically based on the role assigned by ISE.  Once the WLC would see that role, it would assign that user on the SSID the particular Umbrella policy that was predefined.
 
+## Setup of components
+
+#### Apache and PHP Installation
+Installing Apache and PHP will vary based on the distribution you are running it one.  In our case, we were running Kali Linux on a Raspberry Pi, so our installation instructions will be based on that.
+
+Once on the CLI of the Kali Linux server, you can perform the following steps to get Apache and PHP up and running:
+  1.  First get and install the Apache software
+    apt-get install apache2
+
+  2.  Once that is complete, make sure you have a working web server.  You can verify this by browsing to the IP address of the Apache server you just installed ( http://IPADDRESS )
+
+  3.  Once the Apache functionality is verified, you can then move onto PHP.  From the CLI, you can install PHP with the following command ( Note, in our case, it was PHP 7.2 )
+      apt-get install php7.2
+
+  4.  You may have some prompts you need to answer yes to, but once that is complete, you just need to restart Apache:
+      service apache2 restart
+
+  5.  Now that we have a working Apache and PHP stack, we setup our virtual directory for our PHP script.  In this case, we called it api, but it could be anything you want.  For our distribution, we went into our apache2 configuration directory ( /etc/apache2 ) and added a new conf file in both the conf-available and the conf-enabled.  In our case, we named the api.conf.  In our case, both files were the same, and contained the following:
+
+  <Directory /usr/share/api>
+      Options +FollowSymLinks
+      AllowOverride None
+      <IfVersion >= 2.3>
+              Require all granted
+      </IfVersion>
+      <IfVersion < 2.3>
+              Order Allow,Deny
+              Allow from all
+      </IfVersion>
+
+      AddType application/x-httpd-php .php
+
+      <IfModule mod_php.c>
+              php_flag magic_quotes_gpc Off
+              php_flag short_open_tag On
+              php_flag register_globals Off
+              php_flag register_argc_argv On
+              php_flag track_vars On
+              # this setting is necessary for some locales
+              php_value mbstring.func_overload 0
+              php_value include_path .
+      </IfModule>
+
+      DirectoryIndex index.php
+</Directory>
+
+  6.  Once those files are created and saved, we created the api directory under /usr/share, which is what our configuration documents pointed to.  Once that was complete, we restarted Apache2 again:
+
+      service apache2 restart
+
+  7.  We now placed our php file into that directory, and was able to browse it via the URL;
+
+      http://IPADDRESS/api/guest-update.php
+
+#### Identity Services Engine Setup
+For ISE, there needs to be authorization profiles setup to let ISE know what to do when something matches the authorization rule.  In our case, the result of that authorization rule match will assign the correct authorization profile.  This authorization profile just sets the role so that the WLC will be able to see which role that user gets.  Here is a screenshot of one of our authorization profiles:
+
+![ISE Authorization Profile](img/ISE-profile.png)
+
+The last portion to setup in ISE is the actual authorization profile.  There are lots of ways you can write your rules, but in our case, we match a specific SSID and also match against the domain in the username.  Below is a screenshot of our authorazation rules.  You can also see in this screenshot how we assign the profile as well:
+
+![ISE Authorization Policy Set](img/ISE-authz.png)
+
+#### Wireless Lan Controller ( WLC ) Setup
+The action item within the WLC setup is to tie our WLC to Umbrella via the Network Devices API.  Within Umbrella, you can generate that API token and then apply it within the WLC configuration.  Once that is complete, you then add all the profiles you want to have mapped.  This will autogenerate the identities within Umbrella now that we are speaking to it via the API.  Below is a screenshot of the Profiles we created:
+
+![WLC OpenDNS Profile](img/WLC-odns.png)
+
+Within the WLC, we setup local policies that matched the role we got from ISE.  We can then assign the specific Umbrella policy based on these local policies.  First, here is a screenshot of our local policies:
+
+![WLC Local Profile](img/WLC-localprofile.png)
+
+Each authorization rule in ISE ( or vendor we want to secure ) will have a corresponding local profile.  What these local profiles do is look for the role being assigned by the user/connection, and the assign the Umbrella policy.  Here is a screenshot of one of our Local Policies.  You can see we are looking for the Match Role String, as well as then assigning the OpenDNS Profile.
+
+![WLC Local Profile](img/WLC-localprofile.png)
+
+Finally, once that is all set, we just need to assign the policies to the SSID.  Below is a screenshot of the 3 policies assigned to the SSID in which our guest users will be connecting:
+
+![WLC SSID Policy](img/WLC-ssid-policy.png)
+
+At this point, the WLC is all setup.
+
+#### Umbrella Setup
+Umbrella setup is pretty minimal due to the API integration.  Since we have our WLC and our Umbrella instance integrated with the API, when policies got assigned in the WLC, Umbrella is authomatically provisioned with the Network Devices.  You can see our Umbrella instance here with the 3 device integration policies we created on the WLC:
+
+![Umbrella Device Listing](img/UMB-devicelist.png)
+
+From  here, you can assign the same, or different Umbrella policies on a per group level.  So if you wanted cisco.com users to have different access than leibert.com users, this is where you would do that.
+
 ## API Description
-All the following URL call can be made in the Guest User Inteface:
+All the following URL call can be made in the Guest User Interface:
 
 ```http://{ip address}:{port}/api/check-guest.php&emailid={value}```
 

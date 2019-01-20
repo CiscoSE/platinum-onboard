@@ -15,7 +15,7 @@ Onboarding guest onto a network has been made simpler over the years by advances
 ![Frustration](img/frustration.jpg)
 
 
-These are just several of the problems that are associated with onboarding guest users.   Contractor access is even more problematic since they are onsite so infrequently, so IT departments often have to reenable the contractors credentials at each visit.  Even worse, IT departments attempt to avoid this by giving the contractor an account with credentials permanently enabled with no password 60 or 90 day age restrictions.  The problems are even made worse when the amount of guest users increase.   For example, at a customer trade show when there could be thousands of guest or contractor users. 
+These are just several of the problems that are associated with onboarding guest users.   Contractor access is even more problematic since they are onsite so infrequently, so IT departments often have to reenable the contractors credentials at each visit.  Even worse, IT departments attempt to avoid this by giving the contractor an account with credentials permanently enabled with no password 60 or 90 day age restrictions.  The problems are even made worse when the amount of guest users increase.   For example, at a customer trade show when there could be thousands of guest or contractor users.
 
 With the increase of technological features, there must be a better solution to address this problem!
 
@@ -55,7 +55,7 @@ Our solution leverages the following Cisco technologies:
 
 ## Solution Components
 
-Our solution provides three main components.   The architecture is built aound a microservices framework to demonstrate how multiple solutions can work together as long as there is a well defined API.   The overall architecture is shown below:
+Our solution provides three main components.   The architecture is built around a microservices framework to demonstrate how multiple solutions can work together as long as there is a well defined API.   The overall architecture is shown below:
 
 ![Architecture](img/architecture.png)
 
@@ -65,18 +65,25 @@ There are three main modules in the solution.   They are described below:
 **TODO**
 
 ### broker
-The broker is responsible for receiving requests from the CE-API to provision guest users.   It uses a database to whitelist both video endpoints and email domains to provide a very simple security mechanism. 
+The broker is responsible for receiving requests from the CE-API to provision guest users.   It uses a database to whitelist both video endpoints and email domains to provide a very simple security mechanism.
 
 The broker, will perform the following functions:
 1. Wait for requests from the CE-API to provision a user
 2. Validate any received requests against the security white-list database
 3. Store the requests in an internal database for later tracking
 4. Leverage the REST-API to initiate the actual provisioning process with the guest-update.
-5. Wait for reponse from guest-update for a wifi password
+5. Wait for response from guest-update for a wifi password
 6. Provide status updates to the end user in a WebEx Teams Room
 
 ### guest-update
-**TODO**
+The guest-update is responsible for receiving user requests from the broker to provision guest users within ISE.  It uses various ISE API's to validate and create users.
+
+The guest-update will perform the following functions:
+1.  Will wait for requests from the broker to provision a user within the ISE guest database.
+2.  It will make sure the user is not already there, and if not, it will provision the new user.
+3.  If the user already exists, it will re-active the account, and reset the password.
+4.  In both of those cases, it will send an update back to the broker with a status of completed as well as the current password.
+5.  The infrastructure itself ( ISE, WLC and Umbrella ) are setup and integrated with API's to allow for dynamic policy based on the company the user is from.  See the Readme.md under guest-update for more information.
 
 ## Usage
 
