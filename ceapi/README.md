@@ -2,29 +2,34 @@
 
 ## Introduction
 
-The code in the directory is the service that listens for httpfeedback from Cisco telepresense
-endpoints.  This module then contacts the Broker HTTP API to interact with the broker / core module
-for all database and user creation functions.
+This module allows a user to walk up to a Webex Registered Cisco video endpoint, pair automatically
+to the device using Webex Teams installed on a mobile device, and start a self service guest registration
+process with a single click.  
+
+This module handles the communications and control between the endpoint and the Broker service.  It also
+generates the one screen messages to the end by leveraging the API on the video endpoint.
 
 ## Functionality
 
 This module performs the key functions between the Cisco Endpoints registered to the Cisco Webex Cloud
 and the Broker module.  As you can see in the architecture diagram the Video endpoints, when configured
-as described below, will make API calls to this module the the form of httpfeedback requests.  This
-module will then in turn make API requests to an undocumented API of the endpoint to query for additional
-information.  The information collected is the Webex Teams ID of the users paired with the video endpoint.  
-This module will also use the documented XAPI to generate popup messages and prompts on the screen of the
-endpoint for the user to interact with while registering.
+as described below, will make API calls to this module in the form of httpfeedback requests.  This
+module will then in turn make API requests to API's on the video endpoint to collect additional information
+and generate user facing menu options.  The information collected is the Webex Teams ID of the users paired
+with the video endpoint.  Menus and messages will guide the user and give confirmations as the provisioning
+is successfully initialized.  
 
-The architecture diagram below shows this module in the upper left.  This module and the endpoints make
-requests to each other while this module only make requests to the broker.  The broker always replys with
-detailed results on which this module will log the results and push an on screen notification to the
-video endpoint originating the request.
+The architecture diagram below shows this module in the upper left.  This module and the video endpoints
+make requests to each other in each direction.  This module will then also make calls to the Broker service
+to complete the provisioning processes.  The broker will always reply with a detailed result on which this
+module will log the results and push an on screen notification to the video endpoint originating the request.
 
 **Architecture:**
 ![Architecture](img/architecture.png)
 
 ## The Undocumented API
+
+*Note:  Part of this application leverages an undocumented API on the video endpoints.*
 
 The undocumented API is in fact the API that is used to build the web GUI interface when administering
 the endpoint.  This API is not documented by Cisco, is not supported at this time, and is subject to change
@@ -38,7 +43,7 @@ and then parsed into an array by this module.
 
 ## Configuration / Service Setup
 
-To install this application prepare a unix based Apache / PHP Server in follow the guide below.
+To install this application prepare a unix based Apache / PHP Server and follow the guide below.
 In this guide we will assume the default server directory is /var/www/html
 
 1. Copy all PHP files in this CEAPI directory to your web server.
@@ -82,19 +87,26 @@ chmod +w log
 
 ### Video Endpoint Setup
 
-First, you will need to import the xml file to your video endpoint's in room controls.  This
-provides the GUI button to allow registrants to start the process.  
+1.  Import the xml file to your video endpoint's "In Room Controls" panel.  This
+provides the GUI button to allow registrants to start the process.  At this time
+other controls aside from the controls included in this module are not supported.
 
 
-Next, on your video endpoint you will need to enable HTTP Feedback.  Use the CLI command below
-substituting the IP / Hostname of your CEAPI service.
+Next, on your video endpoint you will need to have HTTP Feedback enabled.  SSH into
+the endpoint and use the CLI command below substituting details for your instance
+of the CEAPI service.  
 
+*Please note that the path could be the root of the server or a sub directory
+depending on how you deploy the application.  Always include the trailing slash
+in the serverURL parameter*
+
+```
 xcommand HttpFeedback Register FeedbackSlot: 1
 Expression: /Event/UserInterface/Extensions/Panel/Clicked
 Expression: /Event/UserInterface/Message/Prompt/Response
 Format: JSON
 ServerUrl: http://<ip address>/platinum-onboard/ceapi/
-
+```
 
 You can verify the feedback registration with the "xstatus HttpFeedback" command
 
@@ -104,7 +116,7 @@ xstatus HttpFeedback
 *s HttpFeedback 1 Expression 2: "/Event/UserInterface/Message/Prompt/Response"
 *s HttpFeedback 1 Format: "JSON"
 *s HttpFeedback 1 Status: OK
-*s HttpFeedback 1 URL: "http://10.100.210.15/platinum-onboard/ceapi/"
+*s HttpFeedback 1 URL: "http://192.168.1.11/platinum-onboard/ceapi/"
 ** end
 
 OK
