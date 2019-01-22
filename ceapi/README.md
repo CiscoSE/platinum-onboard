@@ -20,9 +20,30 @@ cp *.php /var/www/html
 as needed for your environment.
 ```
 cp sample-config config.php
+nano config.php
+```
+3. Edit the file according to your needs.  The username and password are for authentication
+to your video endpoints.  The application must authenticate to your endpoints to extract the
+teams ID needed to create a user account.  These credential must have admin level access
+on the video endpoint.
+
+The "Broker" variable can be an IP address and port number for the borker service.  This is
+the address the CEAPI code will make API calls to to ultimately create user accounts.
+The broker can run on the same system (on a different tcp port 127.0.0.1) or a remote system.
+You can see the sample configuration file contents below:
+
+```php
+
+//telepresense endpoint service account username and password
+//must be admin
+$username = 'username';  
+$password = "password";
+
+//The broker service IP address and port number if not 80
+$broker = "192.168.1.11:8080";
 ```
 
-Before  "sample-config.php" to "config.php"
+
 
 ### Video Endpoint Setup
 
