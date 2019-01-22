@@ -6,8 +6,35 @@ The code in the directory is the service that listens for httpfeedback from Cisc
 endpoints.  This module then contacts the Broker HTTP API to interact with the broker / core module
 for all database and user creation functions.
 
+## Functionality
+
+This module performs the key functions between the Cisco Endpoints registered to the Cisco Webex Cloud
+and the Broker module.  As you can see in the architecture diagram the Video endpoints, when configured
+as described below, will make API calls to this module the the form of httpfeedback requests.  This
+module will then in turn make API requests to an undocumented API of the endpoint to query for additional
+information.  The information collected is the Webex Teams ID of the users paired with the video endpoint.  
+This module will also use the documented XAPI to generate popup messages and prompts on the screen of the
+endpoint for the user to interact with while registering.
+
+The architecture diagram below shows this module in the upper left.  This module and the endpoints make
+requests to each other while this module only make requests to the broker.  The broker always replys with
+detailed results on which this module will log the results and push an on screen notification to the
+video endpoint originating the request.
+
 **Architecture:**
 ![Architecture](img/architecture.png)
+
+## The Undocumented API
+
+The undocumented API is in fact the API that is used to build the web GUI interface when administering
+the endpoint.  This API is not documented by Cisco, is not supported at this time, and is subject to change
+in functionality and format in the future.
+
+To understand this API, browser-based development tools were used to watch the http requests as the
+web admin GUI was loaded.  The reverse engineering process was trial and error based.  The root of the
+API is *https://{ip address}/web/api/*.  This application pruned the resulting data by using the more
+specific *https://{ip address}/web/api/status/Spark/PairedDevice*.  The data is returned in JSON format
+and then parsed into an array by this module.
 
 ## Configuration / Service Setup
 
