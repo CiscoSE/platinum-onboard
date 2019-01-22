@@ -6,6 +6,9 @@ The code in the directory is the service that listens for httpfeedback from Cisc
 endpoints.  This module then contacts the Broker HTTP API to interact with the broker / core module
 for all database and user creation functions.
 
+**Architecture:**
+![Architecture](img/architecture.png)
+
 ## Configuration / Service Setup
 
 To install this application prepare a unix based Apache / PHP Server in follow the guide below.
@@ -26,7 +29,6 @@ nano config.php
 to your video endpoints.  The application must authenticate to your endpoints to extract the
 teams ID needed to create a user account.  These credential must have admin level access
 on the video endpoint.
-
 The "Broker" variable can be an IP address and port number for the borker service.  This is
 the address the CEAPI code will make API calls to to ultimately create user accounts.
 The broker can run on the same system (on a different tcp port 127.0.0.1) or a remote system.
@@ -42,7 +44,13 @@ $password = "password";
 //The broker service IP address and port number if not 80
 $broker = "192.168.1.11:8080";
 ```
+4. The CEAPI generates a log file to assist in troubleshooting and development. To
+use this file you have to create it and enable it to be written to by the Apache user.
 
+```
+touch log
+chmod +w log
+```
 
 
 ### Video Endpoint Setup
