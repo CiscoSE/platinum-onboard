@@ -41,6 +41,7 @@ Our solution leverages the following Cisco technologies:
 
 *  [WebEx Teams](https://www.webex.com/products/teams/index.html)
 *  [WebEx Room Series](https://www.cisco.com/c/en/us/products/collaboration-endpoints/webex-room-series/index.html)
+*  [Cisco Video Endpoint XAPI](https://www.cisco.com/c/dam/en/us/td/docs/telepresence/endpoint/ce94/collaboration-endpoint-software-api-reference-guide-ce94.pdf)
 *  [Cisco Intelligent Proximity](https://www.cisco.com/c/en/us/products/collaboration-endpoints/intelligent-proximity.html)
 *  [Identity Services Engine (ISE)](http://cisco.com/go/ise)
 *  [Cisco PxGrid](http://www.cisco.com/go/pxgrid)
