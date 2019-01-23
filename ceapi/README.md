@@ -70,7 +70,7 @@ You can see the sample configuration file contents below:
 
 //telepresense endpoint service account username and password
 //must be admin
-$username = 'username';  
+$username = "username";  
 $password = "password";
 
 //The broker service IP address and port number if not 80
