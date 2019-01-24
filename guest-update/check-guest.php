@@ -186,7 +186,7 @@ if(isset($_SERVER['REQUEST_METHOD'] ))
       //
       // Need to  call dbAPI and update status to created
       //
-      $dbURL="http://24.239.120.11:9999/api/update-status-guest-account?emailid=".$emailaddy."&status=Completed&guestpassword=".$passwd;
+      $dbURL="http://24.239.120.11:9999/api/update-status-guest-account?emailid=".$emailaddy."&status=completed&guestpassword=".$passwd;
       $message=updateAPI($dbURL);
       echo $message;
     }
