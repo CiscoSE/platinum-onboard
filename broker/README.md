@@ -32,7 +32,7 @@ A very simple GUI is provided to assist the user in performing maintenance on th
 ### Main Screen
 The main screen provides both a Main Menu and a Top Menu for navigation.
 
-![Main Menu] (img/mainmenu.png)
+![Main Menu](img/mainmenu.png)
 
 #### Main Menu
 The main manu will provide the main functions to maintain the database.   You can add data to tables, dump the tables and clear individual or all tables.
@@ -42,23 +42,23 @@ The top menu is a navigation menu that will show an about the software or take y
 
 ### Add to Device Table
 You can use the Add to Device Table to add new video devices to the whitelist table.
-![Add To Device Table] (img/addtodevice.png)
+![Add To Device Table](img/addtodevice.png)
 
 ### Add to Domain Table
 You can use the Add to Domain Table to add new email domains to the whitelist table.
-![Add To Domain Table] (img/addtodomain.png)
+![Add To Domain Table](img/addtodomain.png)
 
 ### Dump the Device Table
 You can use the Dump Device Table to display the contents of the device table.
-![Dump Device Table] (img/dumpdevice.png)
+![Dump Device Table](img/dumpdevice.png)
 
 ### Dump the Domain Table
 You can use the Dump Domain Table to display the contents of the domain table.
-![Dump Domain Table] (img/dumpdomain.png)
+![Dump Domain Table](img/dumpdomain.png)
 
 ### Dump the Guest Table
 You can use the Dump Guest Table to display the contents of the guest table.
-![Dump Guest Table] (img/dumpguest.png)
+![Dump Guest Table](img/dumpguest.png)
 
 
 
