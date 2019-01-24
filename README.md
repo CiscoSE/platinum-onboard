@@ -41,6 +41,7 @@ Our solution leverages the following Cisco technologies:
 
 *  [WebEx Teams](https://www.webex.com/products/teams/index.html)
 *  [WebEx Room Series](https://www.cisco.com/c/en/us/products/collaboration-endpoints/webex-room-series/index.html)
+*  [Cisco Video Endpoint XAPI](https://www.cisco.com/c/dam/en/us/td/docs/telepresence/endpoint/ce94/collaboration-endpoint-software-api-reference-guide-ce94.pdf)
 *  [Cisco Intelligent Proximity](https://www.cisco.com/c/en/us/products/collaboration-endpoints/intelligent-proximity.html)
 *  [Identity Services Engine (ISE)](http://cisco.com/go/ise)
 *  [Cisco PxGrid](http://www.cisco.com/go/pxgrid)
@@ -62,7 +63,16 @@ Our solution provides three main components.   The architecture is built around 
 There are three main modules in the solution.   They are described below:
 
 ### CE-API
-**TODO**
+The CEAPI module listens for provisioning requests from video endpoints.  When the "Network Registration"
+button is pressed the endpoint will send an HTTP Feedback request to the CE API Service.  This service then
+requests the broker to provision the account.  
+
+The CE API performs the following functions:
+1. Listens for HTTP Feedback requests
+2. Validates and received requests
+3. Sends a pop up confirmation back to the video endpoint
+4. When the user confirms he/she would like an account provisioned the service with make a call to the Broker to have the request processed.
+5. A confirmation message is sent to the Video endpoint so the user knows the process is underway.
 
 ### broker
 The broker is responsible for receiving requests from the CE-API to provision guest users.   It uses a database to whitelist both video endpoints and email domains to provide a very simple security mechanism.
