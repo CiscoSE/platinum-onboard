@@ -41,7 +41,7 @@ def create_command_line(args):
     return fieldnames,values
 
 
-def initialize_database(dbname):
+def initialize_database(dbname="database.sqlite"):
     """
 
     @param dbname: name of the database
