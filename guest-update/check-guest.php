@@ -16,20 +16,18 @@ $post_header = array(
 //
 // Random Password Generator for ISE Guest User
 //
-function random_str(
+function passgen(
     $length,
-    $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    $keyspace = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 )
 {
-    $str = '';
-    $max = mb_strlen($keyspace, '8bit') - 1;
-    if ($max < 1) {
-        throw new Exception('$keyspace must be at least two characters long');
+    $genpass = '';
+    $maxlen = mb_strlen($keyspace, '8bit') - 1;
+    for ($i = 0; $i < $length; ++$i)
+    {
+        $genpass .= $keyspace[random_int(0, $maxlen)];
     }
-    for ($i = 0; $i < $length; ++$i) {
-        $str .= $keyspace[random_int(0, $max)];
-    }
-    return $str;
+    return $genpass;
 }
 //
 // API Function for send back to broker
@@ -153,7 +151,7 @@ if(isset($_SERVER['REQUEST_METHOD'] ))
     // Email address doesn't exist, so we need to create
     //
     echo "\r\nCreating User....\r\n\r\n";
-	  $passwd=random_str(10);
+	  $passwd=passgen(10);
 	  $post_string = '<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 	   <ns0:guestuser xmlns:ns0="identity.ers.ise.cisco.com">
 	    <customFields>
@@ -215,7 +213,7 @@ if(isset($_SERVER['REQUEST_METHOD'] ))
         //  User exists but is EXPIRED.  So we need to re-enable
         //
         $url = "https://python-guest:LkjLkj@192.168.1.129:9060/ers/config/guestuser/" . $passed_id;
-	      $passwd=random_str(10);
+	      $passwd=passgen(10);
 	      $post_string = '<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 	      <ns0:guestuser xmlns:ns0="identity.ers.ise.cisco.com">
 		          <customFields>
